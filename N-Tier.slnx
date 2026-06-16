@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="N-Tier.API/N-Tier.API.csproj" />
+  <Project Path="N-Tier.Application/N-Tier.Application.csproj" />
+  <Project Path="N-Tier.Core/N-Tier.Core.csproj" />
+  <Project Path="N-Tier.DataAccess/N-Tier.DataAccess.csproj" />
+  <Project Path="N-Tier.Shared/N-Tier.Shared.csproj" />
+</Solution>
