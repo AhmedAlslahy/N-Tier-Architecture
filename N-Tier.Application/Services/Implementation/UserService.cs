@@ -1,21 +1,23 @@
-﻿namespace N_Tier.Application.Services.Implementation;
+﻿using N_Tier.Core.Identity;
 
-public class UserService(UserManager<User> userManager, SarhneDbContext context) : IUserService
+namespace N_Tier.Application.Services.Implementation;
+
+public class UserService(SarhneDbContext context) : IUserService
 {
     public async Task<Result> AddAdminRole(string userId)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await context.Users.FindByIdAsync(userId);
         if (user == null)
         {
             return UserErrors.NotFound;
         }
-        bool isAdmin = await userManager.IsInRoleAsync(user, "Admin");
+        bool isAdmin = user.Roles.Any(ur => ur.RoleName == "Admin");
         if (isAdmin)
         {
             return RoleErrors.AlreadyExists;
         }
 
-        await userManager.AddToRoleAsync(user, "Admin");
+        await context.AddRoleToUserAsync(user.Id, "Admin");
         return Result.Success();
     }
 

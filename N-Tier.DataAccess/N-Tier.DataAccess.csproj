@@ -21,4 +21,8 @@
     <ProjectReference Include="..\N-Tier.Shared\N-Tier.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Persistence\Migrations\" />
+  </ItemGroup>
+
 </Project>

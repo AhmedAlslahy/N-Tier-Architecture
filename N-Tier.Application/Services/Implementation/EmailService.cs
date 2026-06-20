@@ -1,6 +1,8 @@
-﻿namespace N_Tier.Application.Services.Implementation;
+﻿using N_Tier.Core.Identity;
 
-public class EmailService(UserManager<User> userManager, IOptions<EmailInformations> options, IWebHostEnvironment env) : IEmailService
+namespace N_Tier.Application.Services.Implementation;
+
+public class EmailService(SarhneDbContext context, IOptions<EmailInformations> options, IWebHostEnvironment env) : IEmailService
 {
     private readonly EmailInformations emailInformations = options.Value;
 
@@ -31,7 +33,7 @@ public class EmailService(UserManager<User> userManager, IOptions<EmailInformati
 
     public async Task<Result> SendConfirmEmailOTP(string email, CancellationToken cancellation = default)
     {
-        var user = await userManager.FindByEmailAsync(email);
+        var user = await context.Users.FindByEmailAsync(email);
         if (user == null)
         {
             return UserErrors.NotFound;
@@ -40,11 +42,7 @@ public class EmailService(UserManager<User> userManager, IOptions<EmailInformati
         var otp = RandomNumberGenerator.GetInt32(100000, 999999).ToString();
         user.OTP = otp;
         user.OTPExpire = DateTime.UtcNow.AddMinutes(5);
-        var updateResult = await userManager.UpdateAsync(user);
-        if (!updateResult.Succeeded)
-        {
-            return new Error("Update Failed", "Cannot update OTP", ErrorType.BadRequest);
-        }
+        await context.SaveChangesAsync();
 
         var path = Path.Combine(env.WebRootPath, "Templates", "EmailConfirme.html");
         var htmlBody = await File.ReadAllTextAsync(path, cancellation);
@@ -57,7 +55,7 @@ public class EmailService(UserManager<User> userManager, IOptions<EmailInformati
 
     public async Task<Result> SendForgetPasswordOTP(string email, CancellationToken cancellation = default)
     {
-        var user = await userManager.FindByEmailAsync(email);
+        var user = await context.Users.FindByEmailAsync(email);
         if (user == null)
         {
             return UserErrors.NotFound;
@@ -66,11 +64,8 @@ public class EmailService(UserManager<User> userManager, IOptions<EmailInformati
         var otp = RandomNumberGenerator.GetInt32(100000, 999999).ToString();
         user.OTP = otp;
         user.OTPExpire = DateTime.UtcNow.AddMinutes(5);
-        var updateResult = await userManager.UpdateAsync(user);
-        if (!updateResult.Succeeded)
-        {
-            return new Error("Update Failed", "Cannot update OTP", ErrorType.BadRequest);
-        }
+
+        await context.SaveChangesAsync();
 
         var path = Path.Combine(env.WebRootPath, "Templates", "ForgetPassword.html");
         var htmlBody = await File.ReadAllTextAsync(path, cancellation);
@@ -83,7 +78,7 @@ public class EmailService(UserManager<User> userManager, IOptions<EmailInformati
 
     public async Task<Result> ConfirmEmail(ConfirmEmailDto dto, string userId)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await context.Users.FindByIdAsync(userId);
         if (user == null)
         {
             return UserErrors.NotFound;
@@ -100,14 +95,14 @@ public class EmailService(UserManager<User> userManager, IOptions<EmailInformati
         user.OTP = null;
         user.OTPExpire = null;
         user.EmailConfirmed = true;
-        await userManager.UpdateAsync(user);
+        await context.SaveChangesAsync();
 
         return Result.Success();
     }
 
     public async Task<Result> ForgetPassword(ForgetPasswordDto dto, string email)
     {
-        var user = await userManager.FindByEmailAsync(email);
+        var user = await context.Users.FindByEmailAsync(email);
         if (user == null)
         {
             return UserErrors.NotFound;
@@ -118,31 +113,30 @@ public class EmailService(UserManager<User> userManager, IOptions<EmailInformati
         }
         user.OTP = null;
         user.OTPExpire = null;
-        var passwordHash = userManager.PasswordHasher.HashPassword(user, dto.NewPassword);
-        user.PasswordHash = passwordHash;
-        await userManager.UpdateAsync(user);
+        var passwordHash = PasswordService.HashPassword(dto.NewPassword);
+        user.PasswordHashed = passwordHash;
+        await context.SaveChangesAsync();
 
         return Result.Success();
     }
 
     public async Task<Result> ResetPassword(ResetPasswordDto dto, string userId)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await context.Users.FindByIdAsync(userId);
         if (user == null)
         {
             return UserErrors.NotFound;
         }
 
-        var verify = userManager.PasswordHasher
-       .VerifyHashedPassword(user, user.PasswordHash!, dto.CurrentPassword);
-        if (verify == PasswordVerificationResult.Failed)
+        var verify = PasswordService.CheckPassword(dto.CurrentPassword, user.PasswordHashed);
+        if (!verify)
         {
             return new Error("Wrong Password", "Current password is incorrect", ErrorType.BadRequest);
         }
 
-        var NewpasswordHash = userManager.PasswordHasher.HashPassword(user, dto.NewPassword);
-        user.PasswordHash = NewpasswordHash;
-        await userManager.UpdateAsync(user);
+        var NewpasswordHash = PasswordService.HashPassword(dto.NewPassword);
+        user.PasswordHashed = NewpasswordHash;
+        await context.SaveChangesAsync();
 
         return Result.Success();
     }

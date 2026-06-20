@@ -4,7 +4,6 @@ global using N_Tier.Application.DTOs.UserSetting;
 global using N_Tier.Application.Errors;
 global using N_Tier.Application.Services.Interfaces;
 global using N_Tier.DataAccess.Persistence;
-global using Microsoft.AspNetCore.Identity;
 global using N_Tier.Application.DTOs.User;
 global using N_Tier.Application.Helper;
 global using N_Tier.Core.Entities;

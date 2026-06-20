@@ -1,11 +1,12 @@
-﻿
+﻿using N_Tier.Core.Identity;
+
 namespace N_Tier.Application.Services.Implementation;
 
-public class RoleService(RoleManager<IdentityRole> roleManager) : IRoleService
+public class RoleService(SarhneDbContext context) : IRoleService
 {
-    public async Task<Result<IEnumerable<IdentityRole>>> GetAllRolesAsync()
+    public async Task<Result<IEnumerable<Role>>> GetAllRolesAsync()
     {
-        var roles = await roleManager.Roles.ToListAsync();
+        var roles = await context.Roles.ToListAsync();
         if (!roles.Any())
         {
             return RoleErrors.NotFound;
@@ -20,30 +21,35 @@ public class RoleService(RoleManager<IdentityRole> roleManager) : IRoleService
             return RoleErrors.InvalidData;
         }
 
-        if (await roleManager.RoleExistsAsync(roleName))
+        var exists = await context.Roles.FirstOrDefaultAsync(r => r.RoleName == roleName);
+        if (exists != null)
         {
             return RoleErrors.AlreadyExists;
         }
-
-        var result = await roleManager.CreateAsync(new IdentityRole(roleName));
-        if (!result.Succeeded)
+        var role = new Role
         {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            return new Error("Create Failed", errors, ErrorType.BadRequest);
-        }
+            RoleName = roleName,
+            NormalizedRoleName = roleName.ToUpperInvariant(),
+        };
+
+        var result = await context.Roles.AddAsync(role);
+        await context.SaveChangesAsync();
         return Result.Success();
     }
 
     public async Task<Result> DeleteRoleAsync(string roleId)
     {
-        var role = await roleManager.FindByIdAsync(roleId);
+        var role = await context.Roles.FindAsync(roleId);
 
         if (role == null)
         {
             return RoleErrors.NotFound;
         }
 
-        var result = await roleManager.DeleteAsync(role);
+        await context.Roles
+        .Where(r => r.Id == roleId)
+        .ExecuteDeleteAsync();
+
         return Result.Success();
     }
 }

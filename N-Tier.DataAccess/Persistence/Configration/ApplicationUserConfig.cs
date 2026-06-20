@@ -1,8 +1,10 @@
-﻿namespace N_Tier.DataAccess.Persistence.Configration;
+﻿using N_Tier.Core.Identity;
 
-public class UserConfig : IEntityTypeConfiguration<User>
+namespace N_Tier.DataAccess.Persistence.Configration;
+
+public class ApplicationUserConfig : IEntityTypeConfiguration<ApplicationUser>
 {
-    public void Configure(EntityTypeBuilder<User> builder)
+    public void Configure(EntityTypeBuilder<ApplicationUser> builder)
     {
         builder.ToTable("Users");
 
@@ -58,5 +60,12 @@ public class UserConfig : IEntityTypeConfiguration<User>
           .WithOne(n => n.Sender)
           .HasForeignKey(m => m.SenderId)
           .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(u => u.Roles)
+            .WithMany(r => r.Users)
+             .UsingEntity<Dictionary<string, object>>(
+            "UserRole",
+            j => j.HasOne<Role>().WithMany().HasForeignKey("RoleId"),
+            j => j.HasOne<ApplicationUser>().WithMany().HasForeignKey("UserId"));
     }
 }

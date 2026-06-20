@@ -1,4 +1,5 @@
 ﻿using N_Tier.Core.Common;
+using N_Tier.Core.Identity;
 
 namespace N_Tier.Core.Entities;
 
@@ -12,7 +13,7 @@ public class Message : BaseEntity<int>, IAuditable
     //Relations
     public string ReceiverId { get; set; } = string.Empty;
 
-    public User Receiver { get; set; } = null!;
+    public ApplicationUser Receiver { get; set; } = null!;
     public string SenderId { get; set; } = string.Empty;
-    public User Sender { get; set; } = null!;
+    public ApplicationUser Sender { get; set; } = null!;
 }

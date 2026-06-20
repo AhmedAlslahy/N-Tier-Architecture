@@ -10,12 +10,10 @@ public static class AutomatedMigration
 
         if (context.Database.IsSqlServer()) await context.Database.MigrateAsync();
 
-        var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        await roleManager.CreateRoleAsync("Admin");
-        await roleManager.CreateRoleAsync("User");
+        await context.CreateRoleAsync("Admin");
+        await context.CreateRoleAsync("User");
 
-        var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
-        await userManager.CreateAdminAsync("Admin", "admin@test.com", "Admin@123");
-        await userManager.CreateAdminAsync("Admin1", "admin1@test.com", "Admin@123");
+        await context.CreateAdminAsync("Admin", "admin@test.com", "Admin@123");
+        await context.CreateAdminAsync("Admin1", "admin1@test.com", "Admin@123");
     }
 }

@@ -1,18 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
-using N_Tier.Core.Common;
+﻿using N_Tier.Core.Common;
+using N_Tier.Core.Entities;
 using N_Tier.Core.Enums;
-using System.Diagnostics.CodeAnalysis;
 
-namespace N_Tier.Core.Entities;
+namespace N_Tier.Core.Identity;
 
-public class User : IdentityUser, IAuditable, ISoftDeletable
+public class ApplicationUser : UserIdentity, IAuditable, ISoftDeletable
 {
-    [NotNull]
-    public override required string? UserName { get; set; }
-
-    [NotNull]
-    public override required string? Email { get; set; }
-
     public required string FullName { get; set; }
     public Gender Gender { get; set; } = Gender.Male;
     public string? ImageUrl { get; set; }
@@ -34,6 +27,7 @@ public class User : IdentityUser, IAuditable, ISoftDeletable
     //Relations
     public UserSetting UserSetting { get; set; } = null!;
 
+    public ICollection<Role> Roles { get; set; } = new HashSet<Role>();
     public ICollection<Message> ReceivedMessages { get; set; } = new HashSet<Message>();
     public ICollection<Message> SentMessages { get; set; } = new HashSet<Message>();
     public ICollection<Notification> Notifications { get; set; } = new HashSet<Notification>();

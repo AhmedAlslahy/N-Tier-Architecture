@@ -1,11 +1,15 @@
-﻿namespace N_Tier.DataAccess.Persistence;
+﻿using N_Tier.Core.Identity;
 
-public class SarhneDbContext : IdentityDbContext<User>
+namespace N_Tier.DataAccess.Persistence;
+
+public class SarhneDbContext : DbContext
 {
     public SarhneDbContext(DbContextOptions<SarhneDbContext> options) : base(options)
     {
     }
 
+    public DbSet<ApplicationUser> Users { get; set; }
+    public DbSet<Role> Roles { get; set; }
     public DbSet<UserSetting> UserSettings { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<Message> Messages { get; set; }

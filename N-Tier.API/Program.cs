@@ -2,7 +2,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddProjectConfiguration();
 builder.Services.AddDatabase(builder.Configuration);
-builder.Services.AddIdentityServices();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddValidationServices();

@@ -1,20 +1,25 @@
-﻿namespace N_Tier.Application.Services.Implementation;
+﻿using N_Tier.Core.Identity;
 
-public class AuthService(UserManager<User> userManager, IJwtService jwtService) : IAuthService
+namespace N_Tier.Application.Services.Implementation;
+
+public class AuthService(SarhneDbContext context, IJwtService jwtService) : IAuthService
 {
     public async Task<Result> Register(RegisterDto dto, CancellationToken cancellation)
     {
-        var existingUser = await userManager.FindByEmailAsync(dto.Email);
+        var existingUser = await context.Users.FindByEmailAsync(dto.Email);
         if (existingUser != null)
         {
             return UserErrors.AlreadyExists;
         }
 
-        var user = new User
+        var user = new ApplicationUser
         {
             Email = dto.Email,
+            NormalizedEmail = dto.Email.ToUpperInvariant(),
             FullName = dto.FullName,
             UserName = dto.UserName,
+            NormalizedUserName = dto.UserName.ToUpperInvariant(),
+            PasswordHashed = PasswordService.HashPassword(dto.Password),
             EmailConfirmed = false,
             UserSetting = new UserSetting
             {
@@ -24,31 +29,27 @@ public class AuthService(UserManager<User> userManager, IJwtService jwtService) 
             }
         };
 
-        var result = await userManager.CreateAsync(user, dto.Password);
-        if (!result.Succeeded)
-        {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            return new Error("Create Failed", errors, ErrorType.BadRequest);
-        }
-        await userManager.AddToRoleAsync(user, "User");
+        var result = await context.Users.AddAsync(user);
+        await context.AddRoleAsync(user, "User");
+        await context.SaveChangesAsync(cancellation);
         return Result.Success();
     }
 
     public async Task<Result<LoginRes>> Login(LoginDto dto)
     {
-        var user = await userManager.FindByEmailAsync(dto.Email);
+        var user = await context.Users.FindByEmailAsync(dto.Email);
         if (user == null)
         {
             return UserErrors.NotFound;
         }
 
-        var passwordValid = await userManager.CheckPasswordAsync(user, dto.Password);
+        var passwordValid = PasswordService.CheckPassword(dto.Password, user.PasswordHashed);
         if (!passwordValid)
         {
             return AuthErrors.InvalidPassword;
         }
 
-        var roles = await userManager.GetRolesAsync(user);
+        var roles = await context.Users.GetRolesAsync(user.Id);
         var tokenResult = await jwtService.GenerateToken(user, roles);
 
         if (!tokenResult.IsSuccess)
