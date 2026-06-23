@@ -128,7 +128,7 @@ public class EmailService(SarhneDbContext context, IOptions<EmailInformations> o
             return UserErrors.NotFound;
         }
 
-        var verify = PasswordService.CheckPassword(dto.CurrentPassword, user.PasswordHashed);
+        var verify = PasswordService.VerifyPassword(dto.CurrentPassword, user.PasswordHashed);
         if (!verify)
         {
             return new Error("Wrong Password", "Current password is incorrect", ErrorType.BadRequest);

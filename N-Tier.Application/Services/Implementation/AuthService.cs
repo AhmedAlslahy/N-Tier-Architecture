@@ -43,7 +43,7 @@ public class AuthService(SarhneDbContext context, IJwtService jwtService) : IAut
             return UserErrors.NotFound;
         }
 
-        var passwordValid = PasswordService.CheckPassword(dto.Password, user.PasswordHashed);
+        var passwordValid = PasswordService.VerifyPassword(dto.Password, user.PasswordHashed);
         if (!passwordValid)
         {
             return AuthErrors.InvalidPassword;
