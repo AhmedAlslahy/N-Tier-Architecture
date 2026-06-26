@@ -11,7 +11,7 @@ public class UserIdentity
     public string NormalizedEmail { get; set; } = string.Empty;
     public bool EmailConfirmed { get; set; } = false;
 
-    public required string PasswordHashed { get; set; }
+    public string PasswordHashed { get; set; } = string.Empty;
 
     public string? PhoneNumber { get; set; }
 }

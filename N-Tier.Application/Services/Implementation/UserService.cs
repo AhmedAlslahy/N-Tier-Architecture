@@ -61,8 +61,8 @@ public class UserService(SarhneDbContext context) : IUserService
 
     public async Task<Result<UserDetailsDto>> GetByLinkAsync(string publicLink)
     {
-        var user = context.Users
-            .FirstOrDefault(u => u.PublicLink == publicLink);
+        var user = await context.Users
+            .FirstOrDefaultAsync(u => u.PublicLink == publicLink);
         if (user == null)
         {
             return UserErrors.NotFound;

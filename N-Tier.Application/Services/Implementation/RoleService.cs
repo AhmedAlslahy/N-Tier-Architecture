@@ -7,10 +7,6 @@ public class RoleService(SarhneDbContext context) : IRoleService
     public async Task<Result<IEnumerable<Role>>> GetAllRolesAsync()
     {
         var roles = await context.Roles.ToListAsync();
-        if (!roles.Any())
-        {
-            return RoleErrors.NotFound;
-        }
         return roles;
     }
 
@@ -39,16 +35,14 @@ public class RoleService(SarhneDbContext context) : IRoleService
 
     public async Task<Result> DeleteRoleAsync(string roleId)
     {
-        var role = await context.Roles.FindAsync(roleId);
+        var rows = await context.Roles
+        .Where(r => r.Id == roleId)
+        .ExecuteDeleteAsync();
 
-        if (role == null)
+        if (rows == 0)
         {
             return RoleErrors.NotFound;
         }
-
-        await context.Roles
-        .Where(r => r.Id == roleId)
-        .ExecuteDeleteAsync();
 
         return Result.Success();
     }

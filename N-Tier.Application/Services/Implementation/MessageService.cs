@@ -1,6 +1,9 @@
-﻿namespace N_Tier.Application.Services.Implementation;
+﻿using Microsoft.AspNetCore.SignalR;
+using N_Tier.Application.Hub;
 
-public class MessageService(SarhneDbContext context) : IMessageService
+namespace N_Tier.Application.Services.Implementation;
+
+public class MessageService(SarhneDbContext context, IHubContext<NotificationHub> hubContext) : IMessageService
 {
     public async Task<Result> CreateAsync(CreateMessageDto dto, string userId, CancellationToken cancellation)
     {
@@ -34,6 +37,19 @@ public class MessageService(SarhneDbContext context) : IMessageService
         context.Messages.Add(messageData);
         context.Notifications.Add(dataNotification);
         await context.SaveChangesAsync(cancellation);
+        //-----------------------------------------------
+        var unreadMessages = await context.Messages
+            .CountAsync(m => m.ReceiverId == dto.ReceiverId && !m.IsRead);
+
+        var unreadNotifications = await context.Notifications
+            .CountAsync(n => n.ReceiverId == dto.ReceiverId && !n.IsRead);
+
+        await hubContext.Clients.User(dto.ReceiverId)
+            .SendAsync("UnreadMessageCount", unreadMessages);
+
+        await hubContext.Clients.User(dto.ReceiverId)
+            .SendAsync("UnreadNotificationCount", unreadNotifications);
+        //-------------------------------------------------
         return Result.Success();
     }
 

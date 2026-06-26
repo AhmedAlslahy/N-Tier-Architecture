@@ -1,6 +1,9 @@
-﻿namespace N_Tier.Application.Services.Implementation;
+﻿using Microsoft.AspNetCore.SignalR;
+using N_Tier.Application.Hub;
 
-public class NotificationService(SarhneDbContext context) : INotificationService
+namespace N_Tier.Application.Services.Implementation;
+
+public class NotificationService(SarhneDbContext context, IHubContext<NotificationHub> hubContext) : INotificationService
 {
     public async Task<Result> Send(SendNotificationDto dto, string userId, CancellationToken cancellation = default)
     {
@@ -14,16 +17,22 @@ public class NotificationService(SarhneDbContext context) : INotificationService
 
         context.Notifications.Add(data);
         await context.SaveChangesAsync(cancellation);
+
+        var unreadCount = await context.Notifications
+       .CountAsync(n => !n.IsRead &&
+                        n.ReceiverId == dto.UserId,
+                   cancellation);
+
+        await hubContext.Clients
+            .User(dto.UserId)
+            .SendAsync("UnreadNotificationCount", unreadCount, cancellation);
+
         return Result.Success();
     }
 
     public async Task<Result<IEnumerable<NotificationDetailsDto>>> GetAllByUserId(string userId, CancellationToken cancellation = default)
     {
         var result = await context.Notifications.Where(n => n.ReceiverId == userId).ToListAsync(cancellation);
-        if (result.Count == 0)
-        {
-            return NotificationErrors.NotFound;
-        }
         var data = result.Select(item => new NotificationDetailsDto
         {
             Id = item.Id,
