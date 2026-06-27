@@ -4,7 +4,7 @@ namespace N_Tier.Application.Services.Implementation;
 
 public class RoleService(SarhneDbContext context) : IRoleService
 {
-    public async Task<Result<IEnumerable<Role>>> GetAllRolesAsync()
+    public async Task<Result<List<Role>>> GetAllRolesAsync()
     {
         var roles = await context.Roles.ToListAsync();
         return roles;

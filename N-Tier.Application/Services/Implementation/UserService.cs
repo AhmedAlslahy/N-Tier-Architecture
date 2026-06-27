@@ -34,57 +34,49 @@ public class UserService(SarhneDbContext context) : IUserService
         return Result.Success();
     }
 
-    public async Task<Result<IEnumerable<UserDetailsDto>>> GetAllAsync(CancellationToken cancellation = default)
+    public async Task<Result<List<UserDetailsDto>>> GetAllAsync(CancellationToken cancellation = default)
     {
-        var users = await context.Users.ToListAsync(cancellation);
-
-        var data = new List<UserDetailsDto>();
-
-        foreach (var user in users)
+        var users = await context.Users.AsNoTracking().Select(item => new UserDetailsDto
         {
-            data.Add(new UserDetailsDto
-            {
-                Id = user.Id,
-                Email = user.Email,
-                FullName = user.FullName,
-                PublicLink = user.PublicLink,
-                PhoneNumber = user.PhoneNumber,
-                ImageUrl = user.ImageUrl,
-                Gender = user.Gender,
-                ProfileDescription = user.ProfileDescription,
-                LastSeen = user.LastSeen,
-                ProfileViewsCount = user.ProfileViewsCount,
-            });
-        }
-        return data;
+            Id = item.Id,
+            Email = item.Email,
+            FullName = item.FullName,
+            PublicLink = item.PublicLink,
+            PhoneNumber = item.PhoneNumber,
+            ImageUrl = item.ImageUrl,
+            Gender = item.Gender,
+            ProfileDescription = item.ProfileDescription,
+            LastSeen = item.LastSeen,
+            ProfileViewsCount = item.ProfileViewsCount,
+        }).ToListAsync(cancellation);
+
+        return users;
     }
 
     public async Task<Result<UserDetailsDto>> GetByLinkAsync(string publicLink)
     {
-        var user = await context.Users
-            .FirstOrDefaultAsync(u => u.PublicLink == publicLink);
+        var user = await context.Users.Where(u => u.PublicLink == publicLink)
+            .Select(item => new UserDetailsDto
+            {
+                Id = item.Id,
+                Email = item.Email,
+                FullName = item.FullName,
+                PublicLink = item.PublicLink,
+                PhoneNumber = item.PhoneNumber,
+                ImageUrl = item.ImageUrl,
+                Gender = item.Gender,
+                ProfileDescription = item.ProfileDescription,
+                LastSeen = item.LastSeen,
+                ProfileViewsCount = item.ProfileViewsCount,
+            }).FirstOrDefaultAsync();
         if (user == null)
         {
             return UserErrors.NotFound;
         }
 
-        var data = new UserDetailsDto
-        {
-            Id = user.Id,
-            Email = user.Email,
-            FullName = user.FullName,
-            PublicLink = user.PublicLink,
-            PhoneNumber = user.PhoneNumber,
-            ImageUrl = user.ImageUrl,
-            Gender = user.Gender,
-            ProfileDescription = user.ProfileDescription,
-            LastSeen = user.LastSeen,
-            ProfileViewsCount = user.ProfileViewsCount,
-        };
-
         user.ProfileViewsCount++;
         await context.SaveChangesAsync();
-        return Result<UserDetailsDto>.Success(data);
+        return Result<UserDetailsDto>.Success(user);
     }
 
     public async Task<Result> UpdateAsync(UserUpdateDto dto, string userId, CancellationToken cancellation = default)

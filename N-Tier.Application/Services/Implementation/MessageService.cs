@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using N_Tier.Application.Hub;
+using System.Security.AccessControl;
 
 namespace N_Tier.Application.Services.Implementation;
 
@@ -90,29 +91,21 @@ public class MessageService(SarhneDbContext context, IHubContext<NotificationHub
         return data;
     }
 
-    public async Task<Result<IEnumerable<MessageDetailsDto>>> GetAllByUserId(string userId, CancellationToken cancellation)
+    public async Task<Result<List<MessageDetailsDto>>> GetAllByUserId(string userId, CancellationToken cancellation)
     {
-        var data = await context.Messages.GetAll(userId).ToListAsync(cancellation);
-        if (data.Count == 0)
-        {
-            return MessageErrors.NotFound;
-        }
+        var data = await context.Messages.AsNoTracking().Where(m => m.ReceiverId == userId).Details().ToListAsync(cancellation);
         return data;
     }
 
-    public async Task<Result<IEnumerable<MessageDetailsDto>>> GetAllStarredByUserId(string userId, CancellationToken cancellation)
+    public async Task<Result<List<MessageDetailsDto>>> GetAllStarredByUserId(string userId, CancellationToken cancellation)
     {
-        var data = await context.Messages.GetAllStarred(userId).ToListAsync(cancellation);
-        if (data.Count == 0)
-        {
-            return MessageErrors.NotFound;
-        }
+        var data = await context.Messages.AsNoTracking().Where(m => m.ReceiverId == userId && m.IsStarred).Details().ToListAsync(cancellation);
         return data;
     }
 
-    public async Task<Result<IEnumerable<MessageDetailsDto>>> GetAllUnreadByUserId(string userId, CancellationToken cancellation)
+    public async Task<Result<List<MessageDetailsDto>>> GetAllUnreadByUserId(string userId, CancellationToken cancellation)
     {
-        var data = await context.Messages.Where(n => !n.IsRead).GetAll(userId).ToListAsync(cancellation);
+        var data = await context.Messages.AsNoTracking().Where(m => m.ReceiverId == userId && !m.IsRead).Details().ToListAsync(cancellation);
         if (data.Count == 0)
         {
             return MessageErrors.NotFound;
@@ -125,13 +118,25 @@ public class MessageService(SarhneDbContext context, IHubContext<NotificationHub
         return await context.Messages.CountAsync(n => n.ReceiverId == userId && !n.IsRead, cancellation);
     }
 
-    public async Task<Result<IEnumerable<MessageDetailsDto>>> GetAllSenderByUserId(string userId, CancellationToken cancellation)
+    public async Task<Result<List<MessageDetailsDto>>> GetAllSenderByUserId(string userId, CancellationToken cancellation)
     {
-        var data = await context.Messages.GetAllSender(userId).ToListAsync(cancellation);
-        if (data.Count == 0)
+        var data = await context.Messages.AsNoTracking().Where(m => m.SenderId == userId).Details().ToListAsync(cancellation);
+        return data;
+    }
+
+    public async Task<Result<List<MessageDetailsDto>>> SearchByWordOrUserName(string word, CancellationToken cancellation = default)
+    {
+        if (string.IsNullOrWhiteSpace(word))
         {
-            return MessageErrors.NotFound;
+            return MessageErrors.InvalidData;
         }
+
+        var data = await context.Messages.AsNoTracking()
+            .Where(m => EF.Functions.Like(m.Content, $"%{word}%")
+            || EF.Functions.Like(m.Receiver.FullName, $"%{word}%")
+            || EF.Functions.Like(m.Receiver.FullName, $"%{word}%"))
+            .Details().ToListAsync(cancellation);
+
         return data;
     }
 }

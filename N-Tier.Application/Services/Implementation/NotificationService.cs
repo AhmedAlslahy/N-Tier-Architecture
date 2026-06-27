@@ -30,23 +30,33 @@ public class NotificationService(SarhneDbContext context, IHubContext<Notificati
         return Result.Success();
     }
 
-    public async Task<Result<IEnumerable<NotificationDetailsDto>>> GetAllByUserId(string userId, CancellationToken cancellation = default)
+    public async Task<Result<List<NotificationDetailsDto>>> GetAllByUserId(string userId, CancellationToken cancellation = default)
     {
-        var result = await context.Notifications.Where(n => n.ReceiverId == userId).ToListAsync(cancellation);
-        var data = result.Select(item => new NotificationDetailsDto
+        var result = await context.Notifications.AsNoTracking().Where(n => n.ReceiverId == userId).Select(item => new NotificationDetailsDto
         {
             Id = item.Id,
             IsRead = item.IsRead,
             Body = item.Body,
             CreatedAt = item.CreatedAt,
             Title = item.Title,
-        });
-        return Result<IEnumerable<NotificationDetailsDto>>.Success(data);
+        }).ToListAsync(cancellation);
+        return Result<List<NotificationDetailsDto>>.Success(result);
     }
 
     public async Task<Result<NotificationDetailsDto>> GetById(int id, string userId, CancellationToken cancellation = default)
     {
-        var result = await context.Notifications.ById(id).FirstOrDefaultAsync(n => n.ReceiverId == userId, cancellation);
+        var result = await context.Notifications
+      .Where(n => n.Id == id && n.ReceiverId == userId)
+      .Select(item => new NotificationDetailsDto
+      {
+          Id = item.Id,
+          IsRead = item.IsRead,
+          Body = item.Body,
+          CreatedAt = item.CreatedAt,
+          Title = item.Title,
+      })
+      .FirstOrDefaultAsync(cancellation);
+
         if (result == null)
         {
             return NotificationErrors.NotFound;
@@ -57,15 +67,7 @@ public class NotificationService(SarhneDbContext context, IHubContext<Notificati
             result.IsRead = true;
             await context.SaveChangesAsync(cancellation);
         }
-        var data = new NotificationDetailsDto
-        {
-            Id = result.Id,
-            IsRead = result.IsRead,
-            Body = result.Body,
-            CreatedAt = result.CreatedAt,
-            Title = result.Title,
-        };
-        return data;
+        return result;
     }
 
     public async Task<Result<int>> UnreadCountByUserId(string userId, CancellationToken cancellation = default)

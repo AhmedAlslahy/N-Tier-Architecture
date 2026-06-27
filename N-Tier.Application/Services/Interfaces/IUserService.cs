@@ -1,9 +1,8 @@
-﻿
-namespace N_Tier.Application.Services.Interfaces;
+﻿namespace N_Tier.Application.Services.Interfaces;
 
 public interface IUserService
 {
-    Task<Result<IEnumerable<UserDetailsDto>>> GetAllAsync(CancellationToken cancellation = default);
+    Task<Result<List<UserDetailsDto>>> GetAllAsync(CancellationToken cancellation = default);
 
     Task<Result<UserDetailsDto>> GetByLinkAsync(string publicLink);
 

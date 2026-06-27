@@ -1,5 +1,4 @@
-﻿
-namespace N_Tier.Application.Services.Interfaces;
+﻿namespace N_Tier.Application.Services.Interfaces;
 
 public interface IMessageService
 {
@@ -7,15 +6,17 @@ public interface IMessageService
 
     Task<Result> StarredMessageById(int id, string userId, CancellationToken cancellation = default);
 
-    Task<Result<IEnumerable<MessageDetailsDto>>> GetAllByUserId(string userId, CancellationToken cancellation = default);
+    Task<Result<List<MessageDetailsDto>>> GetAllByUserId(string userId, CancellationToken cancellation = default);
 
     Task<Result<MessageDetailsDto>> GetMessageById(int id, string userId, CancellationToken cancellation = default);
 
-    Task<Result<IEnumerable<MessageDetailsDto>>> GetAllStarredByUserId(string userId, CancellationToken cancellation = default);
+    Task<Result<List<MessageDetailsDto>>> GetAllStarredByUserId(string userId, CancellationToken cancellation = default);
 
-    Task<Result<IEnumerable<MessageDetailsDto>>> GetAllUnreadByUserId(string userId, CancellationToken cancellation = default);
+    Task<Result<List<MessageDetailsDto>>> GetAllUnreadByUserId(string userId, CancellationToken cancellation = default);
 
-    Task<Result<IEnumerable<MessageDetailsDto>>> GetAllSenderByUserId(string userId, CancellationToken cancellation);
+    Task<Result<List<MessageDetailsDto>>> GetAllSenderByUserId(string userId, CancellationToken cancellation);
 
     Task<Result<int>> UnreadCountByUserId(string userId, CancellationToken cancellation = default);
+
+    Task<Result<List<MessageDetailsDto>>> SearchByWordOrUserName(string word, CancellationToken cancellation = default);
 }

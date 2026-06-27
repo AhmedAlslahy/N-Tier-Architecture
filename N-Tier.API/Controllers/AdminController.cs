@@ -3,7 +3,7 @@
 [Route("api/[controller]")]
 [Authorize(Roles = "Admin")]
 [ApiController]
-public class AdminController(INotificationService notificationService, IUserService userService
+public class AdminController(INotificationService notificationService, IUserService userService, IMessageService messageService
     , IRoleService roleService) : BaseController
 {
     //--------------------- Role ----------------------------------------------
@@ -57,6 +57,15 @@ public class AdminController(INotificationService notificationService, IUserServ
     public async Task<IActionResult> DeleteUser(string userId)
     {
         var result = await userService.DeleteAsync(userId);
+        return HandleResult(result);
+    }
+
+    //---------------------------- message -------------------------------------------------------
+
+    [HttpGet("messages")]
+    public async Task<IActionResult> SearchByWordOrUserName(string word)
+    {
+        var result = await messageService.SearchByWordOrUserName(word);
         return HandleResult(result);
     }
 }
