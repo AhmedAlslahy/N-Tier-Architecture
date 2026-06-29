@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using N_Tier.Application.Hub;
-using System.Security.AccessControl;
 
 namespace N_Tier.Application.Services.Implementation;
 
@@ -9,33 +8,41 @@ public class MessageService(SarhneDbContext context, IHubContext<NotificationHub
     public async Task<Result> CreateAsync(CreateMessageDto dto, string userId, CancellationToken cancellation)
     {
         //create Message
-        var messageData = new Message
+
+        string? photoUrl = null;
+
+        if (dto.Photo != null)
         {
-            Content = dto.Content,
-            ReceiverId = dto.ReceiverId,
-            SenderId = userId,
-            PhotoUrl = dto.Photo != null ? Upload.UploadFile("Photos", dto.Photo) : null
-        };
+            photoUrl = Upload.UploadFile("Photos", dto.Photo);
+        }
+
+        var message = new Message(
+           userId,
+           dto.ReceiverId,
+           dto.Content,
+           photoUrl
+          );
 
         //create notification
-        var dataNotification = new Notification
-        {
-            Title = "New Message",
-            IsRead = false,
-            SenderId = userId,
-            ReceiverId = dto.ReceiverId
-        };
-
+        string body = string.Empty;
         if (!string.IsNullOrWhiteSpace(dto.Content))
         {
-            dataNotification.Body = dto.Content;
+            body = dto.Content;
         }
         else if (dto.Photo != null)
         {
-            dataNotification.Body = "Sent an image";
+            body = "Sent an image";
         }
 
-        context.Messages.Add(messageData);
+        var dataNotification = new Notification
+        (
+          "New Message",
+          body,
+          userId,
+          dto.ReceiverId
+       );
+
+        context.Messages.Add(message);
         context.Notifications.Add(dataNotification);
         await context.SaveChangesAsync(cancellation);
         //-----------------------------------------------
@@ -56,12 +63,12 @@ public class MessageService(SarhneDbContext context, IHubContext<NotificationHub
 
     public async Task<Result> StarredMessageById(int id, string userId, CancellationToken cancellation)
     {
-        var result = await context.Messages.FirstOrDefaultAsync(n => n.Id == id && n.ReceiverId == userId, cancellation);
-        if (result == null)
+        var message = await context.Messages.FirstOrDefaultAsync(n => n.Id == id && n.ReceiverId == userId, cancellation);
+        if (message == null)
         {
             return MessageErrors.NotFound;
         }
-        result.IsStarred = !result.IsStarred;
+        message.ToggleStar();
         await context.SaveChangesAsync(cancellation);
         return Result.Success();
     }
@@ -84,7 +91,7 @@ public class MessageService(SarhneDbContext context, IHubContext<NotificationHub
         };
         if (!result.IsRead)
         {
-            result.IsRead = true;
+            result.MarkAsRead();
             await context.SaveChangesAsync(cancellation);
         }
 

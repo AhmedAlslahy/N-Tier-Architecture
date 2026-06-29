@@ -21,12 +21,7 @@ public static class SeedExtensions
             Email = email,
             PasswordHashed = HashPassword,
             EmailConfirmed = true,
-            UserSetting = new UserSetting
-            {
-                AllowAnonymousMessages = true,
-                ShowLastSeen = true,
-                ShowProfileViews = true
-            }
+            UserSetting = new UserSetting()
         };
 
         await context.Users.AddAsync(user);

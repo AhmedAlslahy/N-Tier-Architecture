@@ -32,9 +32,9 @@ public class UserSettingService(SarhneDbContext context) : IUserSettingService
             return UserErrors.NotFound;
         }
 
-        result.AllowAnonymousMessages = dto.AllowAnonymousMessages;
-        result.ShowLastSeen = dto.ShowLastSeen;
-        result.ShowProfileViews = dto.ShowProfileViews;
+        result.SetAnonymousMessages(dto.AllowAnonymousMessages);
+        result.SetLastSeen(dto.ShowLastSeen);
+        result.SetProfileViews(dto.ShowProfileViews);
         await context.SaveChangesAsync(cancellation);
         return Result.Success();
     }

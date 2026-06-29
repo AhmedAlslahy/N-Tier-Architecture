@@ -8,12 +8,12 @@ public class NotificationService(SarhneDbContext context, IHubContext<Notificati
     public async Task<Result> Send(SendNotificationDto dto, string userId, CancellationToken cancellation = default)
     {
         var data = new Notification
-        {
-            Body = dto.Body!,
-            Title = dto.Title,
-            SenderId = userId,
-            ReceiverId = dto.UserId
-        };
+        (
+            dto.Title,
+            dto.Body!,
+            userId,
+            dto.UserId
+        );
 
         context.Notifications.Add(data);
         await context.SaveChangesAsync(cancellation);

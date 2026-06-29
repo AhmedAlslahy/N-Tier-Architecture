@@ -21,12 +21,7 @@ public class AuthService(SarhneDbContext context, IJwtService jwtService) : IAut
             NormalizedUserName = dto.UserName.ToUpperInvariant(),
             PasswordHashed = PasswordService.HashPassword(dto.Password),
             EmailConfirmed = false,
-            UserSetting = new UserSetting
-            {
-                AllowAnonymousMessages = true,
-                ShowLastSeen = true,
-                ShowProfileViews = true
-            }
+            UserSetting = new UserSetting()
         };
 
         var result = await context.Users.AddAsync(user);
