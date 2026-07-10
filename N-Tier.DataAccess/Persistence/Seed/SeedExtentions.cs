@@ -12,7 +12,7 @@ public static class SeedExtensions
         if (user is not null)
             return;
         var HashPassword = PasswordService.HashPassword(password);
-        user = new ApplicationUser
+        user = new User
         {
             FullName = fullName,
             UserName = email,

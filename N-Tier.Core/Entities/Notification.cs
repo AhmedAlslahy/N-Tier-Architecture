@@ -5,17 +5,16 @@ namespace N_Tier.Core.Entities;
 
 public class Notification : BaseEntity<int>, IAuditable
 {
-    public string Title { get; private set; } = null!;
-    public string Body { get; private set; } = string.Empty;
+    public string Title { get; set; } = null!;
+    public string Body { get; set; } = string.Empty;
     public bool IsRead { get; private set; } = false;
 
     // Relations
-    public string ReceiverId { get; private set; } = string.Empty;
+    public string ReceiverId { get; set; } = null!;
 
-    public ApplicationUser Receiver { get; private set; } = null!;
-
-    public string SenderId { get; private set; } = string.Empty;
-    public ApplicationUser Sender { get; private set; } = null!;
+    public User Receiver { get; set; } = null!;
+    public string SenderId { get; set; } = null!;
+    public User Sender { get; set; } = null!;
 
     private Notification()
     {

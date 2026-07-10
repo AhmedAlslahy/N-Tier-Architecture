@@ -6,5 +6,5 @@ public class Role
     public string RoleName { get; set; } = string.Empty;
     public string NormalizedRoleName { get; set; } = string.Empty;
 
-    public ICollection<ApplicationUser> Users { get; set; } = new HashSet<ApplicationUser>();
+    public ICollection<User> Users { get; set; } = new HashSet<User>();
 }

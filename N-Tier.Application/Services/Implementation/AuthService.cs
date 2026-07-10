@@ -12,7 +12,7 @@ public class AuthService(SarhneDbContext context, IJwtService jwtService) : IAut
             return UserErrors.AlreadyExists;
         }
 
-        var user = new ApplicationUser
+        var user = new User
         {
             Email = dto.Email,
             NormalizedEmail = dto.Email.ToUpperInvariant(),

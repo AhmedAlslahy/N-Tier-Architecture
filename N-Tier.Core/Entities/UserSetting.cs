@@ -10,9 +10,9 @@ public class UserSetting : BaseEntity<int>, IAuditable
     public bool ShowProfileViews { get; private set; } = true;
 
     //Relations
-    public string UserId { get; private set; } = string.Empty;
+    public string UserId { get; set; } = string.Empty;
 
-    public ApplicationUser User { get; private set; } = null!;
+    public User User { get; set; } = null!;
 
     //-------------------------------------------------------
     public void SetAnonymousMessages(bool allow)

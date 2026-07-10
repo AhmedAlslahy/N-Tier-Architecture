@@ -2,9 +2,9 @@
 
 namespace N_Tier.DataAccess.Persistence.Configration;
 
-public class ApplicationUserConfig : IEntityTypeConfiguration<ApplicationUser>
+public class ApplicationUserConfig : IEntityTypeConfiguration<User>
 {
-    public void Configure(EntityTypeBuilder<ApplicationUser> builder)
+    public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.ToTable("Users");
 
@@ -66,6 +66,6 @@ public class ApplicationUserConfig : IEntityTypeConfiguration<ApplicationUser>
              .UsingEntity<Dictionary<string, object>>(
             "UserRole",
             j => j.HasOne<Role>().WithMany().HasForeignKey("RoleId"),
-            j => j.HasOne<ApplicationUser>().WithMany().HasForeignKey("UserId"));
+            j => j.HasOne<User>().WithMany().HasForeignKey("UserId"));
     }
 }

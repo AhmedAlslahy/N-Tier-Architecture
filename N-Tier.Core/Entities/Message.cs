@@ -5,17 +5,17 @@ namespace N_Tier.Core.Entities;
 
 public class Message : BaseEntity<int>, IAuditable
 {
-    public string? Content { get; private set; }
-    public string? PhotoUrl { get; private set; }
+    public string? Content { get; set; }
+    public string? PhotoUrl { get; set; }
     public bool IsRead { get; private set; } = false;
     public bool IsStarred { get; private set; } = false;
 
     //Relations
-    public string ReceiverId { get; private set; } = string.Empty;
+    public string ReceiverId { get; set; } = string.Empty;
 
-    public ApplicationUser Receiver { get; private set; } = null!;
-    public string SenderId { get; private set; } = string.Empty;
-    public ApplicationUser Sender { get; private set; } = null!;
+    public User Receiver { get; set; } = null!;
+    public string SenderId { get; set; } = string.Empty;
+    public User Sender { get; set; } = null!;
 
     //------------------------------------------------------------------
     private Message() { }

@@ -6,7 +6,7 @@ public class JwtService(IOptions<JwtInformations> options) : IJwtService
 {
     private readonly JwtInformations jwt = options.Value;
 
-    public async Task<Result<GenerateTokenResDto>> GenerateToken(ApplicationUser user, IList<string> roles)
+    public async Task<Result<GenerateTokenResDto>> GenerateToken(User user, IList<string> roles)
     {
         List<Claim> UserClaims =
      [

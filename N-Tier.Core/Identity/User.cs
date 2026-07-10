@@ -4,7 +4,7 @@ using N_Tier.Core.Enums;
 
 namespace N_Tier.Core.Identity;
 
-public class ApplicationUser : UserIdentity, IAuditable, ISoftDeletable
+public class User : BaseEntity, IAuditable, ISoftDeletable
 {
     public required string FullName { get; set; }
     public Gender Gender { get; set; } = Gender.Male;

@@ -4,18 +4,18 @@ namespace N_Tier.Core.Identity;
 
 public static class ApplicationUserExtentions
 {
-    public static async Task<ApplicationUser?> FindByEmailAsync(this IQueryable<ApplicationUser> users, string email)
+    public static async Task<User?> FindByEmailAsync(this IQueryable<User> users, string email)
     {
         return await users.FirstOrDefaultAsync(u => u.NormalizedEmail == email.ToUpperInvariant());
     }
 
-    public static async Task<ApplicationUser?> FindByIdAsync(this IQueryable<ApplicationUser> users, string userId)
+    public static async Task<User?> FindByIdAsync(this IQueryable<User> users, string userId)
     {
         return await users.FirstOrDefaultAsync(u => u.Id == userId);
     }
 
     public static async Task<IList<string>> GetRolesAsync(
-     this IQueryable<ApplicationUser> users, string userId)
+     this IQueryable<User> users, string userId)
     {
         return await users
             .Where(u => u.Id == userId)
@@ -28,7 +28,7 @@ public static class ApplicationUserExtentions
            string userId,
            string roleName)
     {
-        var user = await context.Set<ApplicationUser>()
+        var user = await context.Set<User>()
             .Include(u => u.Roles)
             .FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null)
@@ -52,7 +52,7 @@ public static class ApplicationUserExtentions
     }
 
     public static async Task AddRoleAsync(this DbContext context,
-           ApplicationUser user,
+           User user,
            string roleName)
     {
         var role = await context.Set<Role>()

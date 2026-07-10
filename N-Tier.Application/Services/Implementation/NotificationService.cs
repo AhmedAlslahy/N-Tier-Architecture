@@ -45,17 +45,19 @@ public class NotificationService(SarhneDbContext context, IHubContext<Notificati
 
     public async Task<Result<NotificationDetailsDto>> GetById(int id, string userId, CancellationToken cancellation = default)
     {
-        var result = await context.Notifications
-      .Where(n => n.Id == id && n.ReceiverId == userId)
-      .Select(item => new NotificationDetailsDto
-      {
-          Id = item.Id,
-          IsRead = item.IsRead,
-          Body = item.Body,
-          CreatedAt = item.CreatedAt,
-          Title = item.Title,
-      })
-      .FirstOrDefaultAsync(cancellation);
+        var notification = await context.Notifications.FirstOrDefaultAsync(n => n.Id == id && n.ReceiverId == userId, cancellation);
+        if (notification == null)
+        {
+            return NotificationErrors.NotFound;
+        }
+        var result = new NotificationDetailsDto
+        {
+            Id = notification.Id,
+            IsRead = notification.IsRead,
+            Body = notification.Body,
+            CreatedAt = notification.CreatedAt,
+            Title = notification.Title,
+        };
 
         if (result == null)
         {
@@ -64,7 +66,7 @@ public class NotificationService(SarhneDbContext context, IHubContext<Notificati
 
         if (!result.IsRead)
         {
-            result.IsRead = true;
+            notification.MarkAsRead();
             await context.SaveChangesAsync(cancellation);
         }
         return result;
