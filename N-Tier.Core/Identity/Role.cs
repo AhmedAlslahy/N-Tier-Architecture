@@ -1,10 +1,24 @@
-﻿namespace N_Tier.Core.Identity;
+﻿using N_Tier.Core.Common;
+using System.Xml.Linq;
 
-public class Role
+namespace N_Tier.Core.Identity;
+
+public class Role : BaseEntity<int>
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
-    public string RoleName { get; set; } = string.Empty;
-    public string NormalizedRoleName { get; set; } = string.Empty;
+    private string _name = string.Empty;
 
-    public ICollection<User> Users { get; set; } = new HashSet<User>();
+    public string Name
+    {
+        get => _name;
+        set
+        {
+            _name = value;
+            NormalizedName = value.ToUpperInvariant();
+        }
+    }
+
+    public string NormalizedName { get; private set; } = string.Empty;
+
+    //Relations
+    public ICollection<UserRole> UserRoles { get; set; } = [];
 }

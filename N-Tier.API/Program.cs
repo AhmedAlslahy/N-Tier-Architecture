@@ -1,4 +1,5 @@
-using N_Tier.Application.Exceptions;
+using N_Tier.API.Middlewares;
+using N_Tier.Application.Helper.Seed;
 using N_Tier.Application.Hub;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,8 +23,8 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-
     await AutomatedMigration.MigrateAsync(services);
+    await SeedData.SeedAsync(scope.ServiceProvider);
 }
 
 if (app.Environment.IsDevelopment())

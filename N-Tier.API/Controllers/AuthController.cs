@@ -1,34 +1,47 @@
-﻿namespace N_Tier.API.Controllers;
+﻿using static N_Tier.Application.Features.Auth.Login;
+using static N_Tier.Application.Features.Auth.Register;
+using static N_Tier.Application.Features.Email.ConfirmEmail;
+using static N_Tier.Application.Features.Email.ForgetPassword;
+using static N_Tier.Application.Features.Email.ResetPassword;
+using static N_Tier.Application.Features.Email.SendConfirmEmailOTP;
+using static N_Tier.Application.Features.Email.SendForgetPasswordOTP;
+
+namespace N_Tier.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AuthController(IAuthService authService, IEmailService emailService) : BaseController
+public class AuthController(LoginHandler login, RegisterHandler register, SendConfirmEmailOTPHandler sendConfirmEmailOTP
+    , SendForgetPasswordOTPHandler sendForgetPasswordOTP, ConfirmEmailHandler confirmEmail, ForgetPasswordHandler forgetPassword
+    , ResetPasswordHandler resetPassword) : BaseController
 {
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginDto dto)
+    public async Task<IActionResult> Login(LoginReq req)
     {
-        var result = await authService.Login(dto);
-        if (!result.IsSuccess)
-        {
-            return BadRequest(result.Failure);
-        }
+        var result = await login.Handle(req);
 
-        Response.Cookies.Append("jwt", result.Data.Token, new CookieOptions
+        if (!result.IsSuccess)
+            return BadRequest(result.Failure);
+
+        Response.Cookies.Append("jwt", result.Data!.Token, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddHours(1)
+            Expires = result.Data.ExpireIn
         });
 
         return Ok(result.Data);
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterDto dto, CancellationToken cancellation)
+    public async Task<IActionResult> Register(RegisterReq req)
     {
-        var result = await authService.Register(dto, cancellation);
-        return HandleResult(result);
+        var result = await register.Handle(req);
+
+        if (!result.IsSuccess)
+            return BadRequest(result.Failure);
+
+        return Ok();
     }
 
     [Authorize]
@@ -41,39 +54,39 @@ public class AuthController(IAuthService authService, IEmailService emailService
     }
 
     //----------------------------------------------------
-    [HttpPost("send-confirm-email-OTP")]
-    public async Task<IActionResult> SendConfirmEmailOTP(string email, CancellationToken cancellation)
+    [HttpPost("send-confirm-email-otp")]
+    public async Task<IActionResult> SendConfirmEmailOTP(SendConfirmEmailOTPReq req)
     {
-        var result = await emailService.SendConfirmEmailOTP(email, cancellation);
+        var result = await sendConfirmEmailOTP.Handle(req);
         return HandleResult(result);
     }
 
-    [HttpPost("Send-Forget-Password-OTP")]
-    public async Task<IActionResult> SendForgetPasswordOTP(string email, CancellationToken cancellation)
+    [HttpPost("send-forget-password-otp")]
+    public async Task<IActionResult> SendForgetPasswordOTP(SendForgetPasswordOTPReq req)
     {
-        var result = await emailService.SendForgetPasswordOTP(email, cancellation);
+        var result = await sendForgetPasswordOTP.Handle(req);
         return HandleResult(result);
     }
 
     [HttpPost("confirm-email")]
-    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailDto dto)
+    public async Task<IActionResult> ConfirmEmail(ConfirmEmailReq req)
     {
-        var result = await emailService.ConfirmEmail(dto, userId);
+        var result = await confirmEmail.Handle(req, userId);
         return HandleResult(result);
     }
 
     [HttpPost("forget-password")]
-    public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordDto dto, string email)
+    public async Task<IActionResult> ForgetPassword(ForgetPasswordReq req, string Email)
     {
-        var result = await emailService.ForgetPassword(dto, email);
+        var result = await forgetPassword.Handle(req, Email);
         return HandleResult(result);
     }
 
     [Authorize]
     [HttpPost("reset-password")]
-    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+    public async Task<IActionResult> ResetPassword(ResetPasswordReq req)
     {
-        var result = await emailService.ResetPassword(dto, userId);
+        var result = await resetPassword.Handle(req, userId);
         return HandleResult(result);
     }
 }

@@ -3,7 +3,7 @@ using N_Tier.Core.Identity;
 
 namespace N_Tier.Core.Entities;
 
-public class Message : BaseEntity<int>, IAuditable
+public class Message : BaseEntity<int>
 {
     public string? Content { get; set; }
     public string? PhotoUrl { get; set; }
@@ -11,16 +11,16 @@ public class Message : BaseEntity<int>, IAuditable
     public bool IsStarred { get; private set; } = false;
 
     //Relations
-    public string ReceiverId { get; set; } = string.Empty;
+    public int ReceiverId { get; set; }
 
     public User Receiver { get; set; } = null!;
-    public string SenderId { get; set; } = string.Empty;
+    public int SenderId { get; set; }
     public User Sender { get; set; } = null!;
 
     //------------------------------------------------------------------
     private Message() { }
 
-    public Message(string senderId, string receiverId, string? content, string? photoUrl)
+    public Message(int senderId, int receiverId, string? content, string? photoUrl)
     {
         if (string.IsNullOrWhiteSpace(content) && string.IsNullOrWhiteSpace(photoUrl))
             throw new ArgumentException("Message must contain content or a photo.");

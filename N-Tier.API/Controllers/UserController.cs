@@ -1,22 +1,28 @@
-﻿namespace N_Tier.API.Controllers;
+﻿using static N_Tier.Application.Features.User.GetByLink;
+using static N_Tier.Application.Features.User.UpdateUser;
+using static N_Tier.Application.Features.UserSetting.GetByUserId;
+using static N_Tier.Application.Features.UserSetting.UpdateUserSetting;
+
+namespace N_Tier.API.Controllers;
 
 [Route("api/users")]
 [Authorize]
 [ApiController]
-public class UserController(IUserService userService, IUserSettingService userSettingService) : BaseController
+public class UserController(GetByLinkHandler getByLink, UpdateUserHandler updateUser, GetByUserIdHandler getByUserId
+    , UpdateUserSettingHandler updateUserSetting) : BaseController
 {
     //------------------------- user --------------------------------------------
     [HttpGet("{publicLink}")]
     public async Task<IActionResult> GetByLink(string publicLink)
     {
-        var result = await userService.GetByLinkAsync(publicLink);
+        var result = await getByLink.Handle(publicLink);
         return HandleResult(result);
     }
 
     [HttpPut("")]
-    public async Task<IActionResult> UpdateUser(UserUpdateDto dto)
+    public async Task<IActionResult> UpdateUser(UpdateUserReq req)
     {
-        var result = await userService.UpdateAsync(dto, userId);
+        var result = await updateUser.Handle(req, userId);
         return HandleResult(result);
     }
 
@@ -25,14 +31,14 @@ public class UserController(IUserService userService, IUserSettingService userSe
     [HttpGet("setting")]
     public async Task<IActionResult> GetByUserId()
     {
-        var result = await userSettingService.GetByUserId(userId);
+        var result = await getByUserId.Handle(userId);
         return HandleResult(result);
     }
 
     [HttpPut("setting")]
-    public async Task<IActionResult> UpdateSetting(UpdateUserSettingDto dto, CancellationToken cancellation)
+    public async Task<IActionResult> UpdateSetting(UpdateUserSettingReq req)
     {
-        var result = await userSettingService.Update(dto, userId, cancellation);
+        var result = await updateUserSetting.Handle(req, userId);
         return HandleResult(result);
     }
 }

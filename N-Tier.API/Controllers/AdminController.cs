@@ -1,46 +1,56 @@
-﻿namespace N_Tier.API.Controllers;
+﻿using static N_Tier.Application.Features.Message.SearchByWordOrUserName;
+using static N_Tier.Application.Features.Notification.SendNotification;
+using static N_Tier.Application.Features.Role.CreateRole;
+using static N_Tier.Application.Features.Role.DeleteRole;
+using static N_Tier.Application.Features.Role.GetAllRoles;
+using static N_Tier.Application.Features.User.AddAdminRole;
+using static N_Tier.Application.Features.User.DeleteUser;
+using static N_Tier.Application.Features.User.GetAllUsers;
+
+namespace N_Tier.API.Controllers;
 
 [Route("api/[controller]")]
 [Authorize(Roles = "Admin")]
 [ApiController]
-public class AdminController(INotificationService notificationService, IUserService userService, IMessageService messageService
-    , IRoleService roleService) : BaseController
+public class AdminController(GetAllRolesHandler getAllRoles, DeleteRoleHandler deleteRole, CreateRoleHandler createRole, AddAdminRoleHandler addAdminRole
+    , SendNotificationHandler sendNotification, GetAllUsersHandler getAllUsers, DeleteUserHandler deleteUser, SearchByWordOrUserNameHandler searchByWordOrUserName
+    ) : BaseController
 {
     //--------------------- Role ----------------------------------------------
     [HttpGet("roles")]
     public async Task<IActionResult> GetAllRoles()
     {
-        var result = await roleService.GetAllRolesAsync();
+        var result = await getAllRoles.Handle();
         return HandleResult(result);
     }
 
     [HttpPost("roles")]
-    public async Task<IActionResult> CreateRole(string roleName)
+    public async Task<IActionResult> CreateRole(CreateRoleReq req)
     {
-        var result = await roleService.CreateRoleAsync(roleName);
+        var result = await createRole.Handle(req);
         return HandleResult(result);
     }
 
     [HttpDelete("roles/{roleId}")]
-    public async Task<IActionResult> DeleteRole(string roleId)
+    public async Task<IActionResult> DeleteRole(int roleId)
     {
-        var result = await roleService.DeleteRoleAsync(roleId);
+        var result = await deleteRole.Handle(roleId);
         return HandleResult(result);
     }
 
     [HttpPost("roles/{userId}")]
-    public async Task<IActionResult> AddAdminRole(string userId)
+    public async Task<IActionResult> AddAdminRole(int userId)
     {
-        var result = await userService.AddAdminRole(userId);
+        var result = await addAdminRole.Handle(userId);
         return HandleResult(result);
     }
 
     //-------------------------------  notification   -----------------------------------------
 
     [HttpPost("notifications")]
-    public async Task<IActionResult> CreateNotification(SendNotificationDto dto)
+    public async Task<IActionResult> CreateNotification(SendNotificationReq req)
     {
-        var result = await notificationService.Send(dto, userId);
+        var result = await sendNotification.Handle(req, userId);
         return HandleResult(result);
     }
 
@@ -49,23 +59,23 @@ public class AdminController(INotificationService notificationService, IUserServ
     [HttpGet("users")]
     public async Task<IActionResult> GetAllUsers()
     {
-        var result = await userService.GetAllAsync();
+        var result = await getAllUsers.Handle();
         return HandleResult(result);
     }
 
     [HttpDelete("users/{userId}")]
-    public async Task<IActionResult> DeleteUser(string userId)
+    public async Task<IActionResult> DeleteUser(int userId)
     {
-        var result = await userService.DeleteAsync(userId);
+        var result = await deleteUser.Handle(userId);
         return HandleResult(result);
     }
 
     //---------------------------- message -------------------------------------------------------
 
     [HttpGet("messages")]
-    public async Task<IActionResult> SearchByWordOrUserName(string word)
+    public async Task<IActionResult> SearchByWordOrUserName(SearchByWordOrUserNameReq req)
     {
-        var result = await messageService.SearchByWordOrUserName(word);
+        var result = await searchByWordOrUserName.Handle(req);
         return HandleResult(result);
     }
 }

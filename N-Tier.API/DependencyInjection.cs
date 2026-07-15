@@ -1,4 +1,15 @@
-﻿using N_Tier.Shared.Service;
+﻿using N_Tier.Application.Features.Auth;
+using N_Tier.Application.Features.Email;
+using N_Tier.Application.Features.Message;
+using N_Tier.Application.Features.Notification;
+using N_Tier.Application.Features.Role;
+using N_Tier.Application.Features.User;
+using N_Tier.Application.Features.UserSetting;
+using N_Tier.Application.Helper.DTOs.Config;
+using N_Tier.Application.Helper.Services.Implementation;
+using N_Tier.Application.Helper.Services.Interfaces;
+using N_Tier.Shared.Service;
+using static N_Tier.Application.Features.Auth.Register;
 
 namespace N_Tier.API;
 
@@ -30,7 +41,9 @@ public static class DependencyInjection
                 configuration.GetConnectionString("ProjectConnection"));
 
             options.AddInterceptors(
-                sp.GetRequiredService<AuditInterceptor>());
+                sp.GetRequiredService<AuditInterceptor>(),
+                sp.GetRequiredService<UpdateAuditInterceptor>(),
+                sp.GetRequiredService<SoftDeleteInterceptor>());
         });
 
         return services;
@@ -49,14 +62,54 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<AuditInterceptor>();
-        services.AddScoped<IUserSettingService, UserSettingService>();
-        services.AddScoped<IUserService, UserService>();
-        services.AddScoped<IRoleService, RoleService>();
-        services.AddScoped<INotificationService, NotificationService>();
-        services.AddScoped<IMessageService, MessageService>();
+        services.AddScoped<UpdateAuditInterceptor>();
+        services.AddScoped<SoftDeleteInterceptor>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IEmailService, EmailService>();
-        services.AddScoped<IAuthService, AuthService>();
+
+        //Role
+        services.AddScoped<GetAllRoles.GetAllRolesHandler>();
+        services.AddScoped<DeleteRole.DeleteRoleHandler>();
+        services.AddScoped<CreateRole.CreateRoleHandler>();
+
+        //User
+        services.AddScoped<DeleteUser.DeleteUserHandler>();
+        services.AddScoped<UpdateUser.UpdateUserHandler>();
+        services.AddScoped<GetAllUsers.GetAllUsersHandler>();
+        services.AddScoped<GetByLink.GetByLinkHandler>();
+        services.AddScoped<AddAdminRole.AddAdminRoleHandler>();
+
+        //User Setting
+        services.AddScoped<UpdateUserSetting.UpdateUserSettingHandler>();
+        services.AddScoped<GetByLink.GetByLinkHandler>();
+
+        //Auth
+        services.AddScoped<Login.LoginHandler>();
+        services.AddScoped<Register.RegisterHandler>();
+
+        //Email
+        services.AddScoped<SendConfirmEmailOTP.SendConfirmEmailOTPHandler>();
+        services.AddScoped<SendForgetPasswordOTP.SendForgetPasswordOTPHandler>();
+        services.AddScoped<ConfirmEmail.ConfirmEmailHandler>();
+        services.AddScoped<ForgetPassword.ForgetPasswordHandler>();
+        services.AddScoped<ResetPassword.ResetPasswordHandler>();
+
+        //Notification
+        services.AddScoped<SendNotification.SendNotificationHandler>();
+        services.AddScoped<GetAllNotificationsByUserId.GetAllNotificationsByUserIdHandler>();
+        services.AddScoped<GetNotificationById.GetNotificationByIdHandler>();
+        services.AddScoped<UnreadCountNotificationByUserId.UnreadCountNotificationByUserIdHandler>();
+
+        //Message
+        services.AddScoped<CreateMessage.CreateMessageHandler>();
+        services.AddScoped<GetAllMessageByUserId.GetAllMessageByUserIdHandler>();
+        services.AddScoped<GetAllSenderMessageByUserId.GetAllSenderMessageByUserIdHandler>();
+        services.AddScoped<GetAllMessageStarredByUserId.GetAllMessageStarredByUserIdHandler>();
+        services.AddScoped<GetAllUnreadMessageByUserId.GetAllUnreadMessageByUserIdHandler>();
+        services.AddScoped<GetMessageById.GetMessageByIdHandler>();
+        services.AddScoped<SearchByWordOrUserName.SearchByWordOrUserNameHandler>();
+        services.AddScoped<StarredMessageById.StarredMessageByIdHandler>();
+        services.AddScoped<UnreadCountMessageByUserId.UnreadCountMessageByUserIdHandler>();
 
         return services;
     }
@@ -83,7 +136,7 @@ public static class DependencyInjection
         this IServiceCollection services)
     {
         services.AddValidatorsFromAssembly(
-                typeof(RegisterDtoValidator).Assembly)
+                typeof(RegisterReq).Assembly)
                .AddFluentValidationAutoValidation();
 
         return services;

@@ -1,3 +1,5 @@
+using N_Tier.Application.Common.Abstraction;
+
 namespace N_Tier.API.Controllers;
 
 [ApiController]
@@ -19,6 +21,6 @@ public abstract class BaseController : ControllerBase
         return Ok(result.IsSuccess);
     }
 
-    protected string userId =>
-        User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException();
+    protected int userId =>
+        int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException());
 }
