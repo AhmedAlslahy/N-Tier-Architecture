@@ -1,24 +1,24 @@
-﻿using static N_Tier.Application.Features.Message.CreateMessage;
-using static N_Tier.Application.Features.Message.GetAllMessageByUserId;
-using static N_Tier.Application.Features.Message.GetAllMessageStarredByUserId;
-using static N_Tier.Application.Features.Message.GetAllSenderMessageByUserId;
-using static N_Tier.Application.Features.Message.GetAllUnreadMessageByUserId;
-using static N_Tier.Application.Features.Message.GetMessageById;
-using static N_Tier.Application.Features.Message.StarredMessageById;
-using static N_Tier.Application.Features.Message.UnreadCountMessageByUserId;
+﻿using static N_Tier.Application.Features.Admin.Message.SendMessage;
+using static N_Tier.Application.Features.User.Message.GetAllMessageByUserId;
+using static N_Tier.Application.Features.User.Message.GetAllMessageStarredByUserId;
+using static N_Tier.Application.Features.User.Message.GetAllSenderMessageByUserId;
+using static N_Tier.Application.Features.User.Message.GetAllUnreadMessageByUserId;
+using static N_Tier.Application.Features.User.Message.GetMessageById;
+using static N_Tier.Application.Features.User.Message.StarredMessageById;
+using static N_Tier.Application.Features.User.Message.UnreadCountMessageByUserId;
 
 namespace N_Tier.API.Controllers;
 
 [Route("api/messages")]
 [Authorize]
 [ApiController]
-public class MessageController(CreateMessageHandler createMessage, GetMessageByIdHandler getMessageById
+public class MessageController(SendMessageHandler createMessage, GetMessageByIdHandler getMessageById
     , StarredMessageByIdHandler starredMessageById, GetAllSenderMessageByUserIdHandler getAllSenderMessageByUserId
     , GetAllMessageStarredByUserIdHandler getAllMessageStarredByUserId, GetAllUnreadMessageByUserIdHandler getAllUnreadMessageByUserId
     , UnreadCountMessageByUserIdHandler unreadCountByUserId, GetAllMessageByUserIdHandler getAllMessageByUserId) : BaseController
 {
     [HttpPost("")]
-    public async Task<IActionResult> Create(CreateMessageReq req)
+    public async Task<IActionResult> Create(SendMessageReq req)
     {
         var result = await createMessage.Handle(req, userId);
         return HandleResult(result);

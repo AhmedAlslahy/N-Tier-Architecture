@@ -1,10 +1,10 @@
 ﻿using static N_Tier.Application.Features.Auth.Login;
 using static N_Tier.Application.Features.Auth.Register;
-using static N_Tier.Application.Features.Email.ConfirmEmail;
-using static N_Tier.Application.Features.Email.ForgetPassword;
-using static N_Tier.Application.Features.Email.ResetPassword;
-using static N_Tier.Application.Features.Email.SendConfirmEmailOTP;
-using static N_Tier.Application.Features.Email.SendForgetPasswordOTP;
+using static N_Tier.Application.Features.Auth.ConfirmEmail;
+using static N_Tier.Application.Features.Auth.ForgetPassword;
+using static N_Tier.Application.Features.Auth.ResetPassword;
+using static N_Tier.Application.Features.Auth.SendConfirmEmailOTP;
+using static N_Tier.Application.Features.Auth.SendForgetPasswordOTP;
 
 namespace N_Tier.API.Controllers;
 

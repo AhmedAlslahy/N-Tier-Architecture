@@ -1,10 +1,12 @@
-﻿using N_Tier.Application.Features.Auth;
-using N_Tier.Application.Features.Email;
-using N_Tier.Application.Features.Message;
-using N_Tier.Application.Features.Notification;
-using N_Tier.Application.Features.Role;
-using N_Tier.Application.Features.User;
-using N_Tier.Application.Features.UserSetting;
+﻿using N_Tier.Application.Features.Admin.Message;
+using N_Tier.Application.Features.Admin.Notification;
+using N_Tier.Application.Features.Admin.Role;
+using N_Tier.Application.Features.Admin.User;
+using N_Tier.Application.Features.Auth;
+using N_Tier.Application.Features.User.Message;
+using N_Tier.Application.Features.User.Notification;
+using N_Tier.Application.Features.User.User;
+using N_Tier.Application.Features.User.UserSetting;
 using N_Tier.Application.Helper.DTOs.Config;
 using N_Tier.Application.Helper.Services.Implementation;
 using N_Tier.Application.Helper.Services.Interfaces;
@@ -71,13 +73,13 @@ public static class DependencyInjection
         services.AddScoped<GetAllRoles.GetAllRolesHandler>();
         services.AddScoped<DeleteRole.DeleteRoleHandler>();
         services.AddScoped<CreateRole.CreateRoleHandler>();
+        services.AddScoped<AddAdminRole.AddAdminRoleHandler>();
 
         //User
         services.AddScoped<DeleteUser.DeleteUserHandler>();
         services.AddScoped<UpdateUser.UpdateUserHandler>();
         services.AddScoped<GetAllUsers.GetAllUsersHandler>();
         services.AddScoped<GetByLink.GetByLinkHandler>();
-        services.AddScoped<AddAdminRole.AddAdminRoleHandler>();
 
         //User Setting
         services.AddScoped<UpdateUserSetting.UpdateUserSettingHandler>();
@@ -101,7 +103,7 @@ public static class DependencyInjection
         services.AddScoped<UnreadCountNotificationByUserId.UnreadCountNotificationByUserIdHandler>();
 
         //Message
-        services.AddScoped<CreateMessage.CreateMessageHandler>();
+        services.AddScoped<SendMessage.SendMessageHandler>();
         services.AddScoped<GetAllMessageByUserId.GetAllMessageByUserIdHandler>();
         services.AddScoped<GetAllSenderMessageByUserId.GetAllSenderMessageByUserIdHandler>();
         services.AddScoped<GetAllMessageStarredByUserId.GetAllMessageStarredByUserIdHandler>();

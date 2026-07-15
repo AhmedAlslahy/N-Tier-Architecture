@@ -1,6 +1,6 @@
-﻿using static N_Tier.Application.Features.Notification.UnreadCountNotificationByUserId;
-using static N_Tier.Application.Features.Notification.GetAllNotificationsByUserId;
-using static N_Tier.Application.Features.Notification.GetNotificationById;
+﻿using static N_Tier.Application.Features.User.Notification.UnreadCountNotificationByUserId;
+using static N_Tier.Application.Features.User.Notification.GetAllNotificationsByUserId;
+using static N_Tier.Application.Features.User.Notification.GetNotificationById;
 
 namespace N_Tier.API.Controllers;
 

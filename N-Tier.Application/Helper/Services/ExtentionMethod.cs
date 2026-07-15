@@ -1,4 +1,4 @@
-﻿using static N_Tier.Application.Features.Message.GetMessageById;
+﻿using static N_Tier.Application.Features.User.Message.GetMessageById;
 
 namespace N_Tier.Application.Helper.Services;
 

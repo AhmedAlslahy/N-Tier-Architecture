@@ -1,7 +1,7 @@
-﻿using static N_Tier.Application.Features.User.GetByLink;
-using static N_Tier.Application.Features.User.UpdateUser;
-using static N_Tier.Application.Features.UserSetting.GetByUserId;
-using static N_Tier.Application.Features.UserSetting.UpdateUserSetting;
+﻿using static N_Tier.Application.Features.User.User.GetByLink;
+using static N_Tier.Application.Features.User.User.UpdateUser;
+using static N_Tier.Application.Features.User.UserSetting.GetByUserId;
+using static N_Tier.Application.Features.User.UserSetting.UpdateUserSetting;
 
 namespace N_Tier.API.Controllers;
 

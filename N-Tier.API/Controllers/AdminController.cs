@@ -1,11 +1,11 @@
-﻿using static N_Tier.Application.Features.Message.SearchByWordOrUserName;
-using static N_Tier.Application.Features.Notification.SendNotification;
-using static N_Tier.Application.Features.Role.CreateRole;
-using static N_Tier.Application.Features.Role.DeleteRole;
-using static N_Tier.Application.Features.Role.GetAllRoles;
-using static N_Tier.Application.Features.User.AddAdminRole;
-using static N_Tier.Application.Features.User.DeleteUser;
-using static N_Tier.Application.Features.User.GetAllUsers;
+﻿using static N_Tier.Application.Features.User.Message.SearchByWordOrUserName;
+using static N_Tier.Application.Features.Admin.Notification.SendNotification;
+using static N_Tier.Application.Features.Admin.Role.CreateRole;
+using static N_Tier.Application.Features.Admin.Role.DeleteRole;
+using static N_Tier.Application.Features.Admin.Role.GetAllRoles;
+using static N_Tier.Application.Features.Admin.Role.AddAdminRole;
+using static N_Tier.Application.Features.Admin.User.DeleteUser;
+using static N_Tier.Application.Features.Admin.User.GetAllUsers;
 
 namespace N_Tier.API.Controllers;
 
@@ -48,7 +48,7 @@ public class AdminController(GetAllRolesHandler getAllRoles, DeleteRoleHandler d
     //-------------------------------  notification   -----------------------------------------
 
     [HttpPost("notifications")]
-    public async Task<IActionResult> CreateNotification(SendNotificationReq req)
+    public async Task<IActionResult> SendNotification(SendNotificationReq req)
     {
         var result = await sendNotification.Handle(req, userId);
         return HandleResult(result);
