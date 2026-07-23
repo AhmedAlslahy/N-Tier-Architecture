@@ -12,7 +12,7 @@ using N_Tier.DataAccess.Persistence;
 namespace N_Tier.DataAccess.Persistence.Migrations
 {
     [DbContext(typeof(SarhneDbContext))]
-    [Migration("20260721073226_Init")]
+    [Migration("20260723231511_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -32,6 +32,9 @@ namespace N_Tier.DataAccess.Persistence.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<int?>("CreatedById")
                         .HasColumnType("int");
@@ -71,6 +74,9 @@ namespace N_Tier.DataAccess.Persistence.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<int?>("CreatedById")
                         .HasColumnType("int");
@@ -151,7 +157,7 @@ namespace N_Tier.DataAccess.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("N_Tier.Core.Entities.Identity.UserRole", b =>
@@ -166,7 +172,7 @@ namespace N_Tier.DataAccess.Persistence.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("UserRoles", (string)null);
+                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("N_Tier.Core.Entities.Message", b =>
@@ -179,6 +185,9 @@ namespace N_Tier.DataAccess.Persistence.Migrations
 
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<int?>("CreatedById")
                         .HasColumnType("int");
@@ -234,6 +243,9 @@ namespace N_Tier.DataAccess.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("CreatedById")
                         .HasColumnType("int");
 
@@ -284,6 +296,9 @@ namespace N_Tier.DataAccess.Persistence.Migrations
 
                     b.Property<bool>("AllowAnonymousMessages")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<int?>("CreatedById")
                         .HasColumnType("int");

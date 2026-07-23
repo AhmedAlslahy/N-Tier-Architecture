@@ -6,8 +6,6 @@ public class ApplicationUserConfig : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.ToTable("Users");
-
         builder.HasQueryFilter(x => !x.IsDeleted);
 
         builder.Property(u => u.FullName)

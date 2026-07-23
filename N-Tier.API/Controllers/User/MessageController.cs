@@ -17,7 +17,7 @@ public class MessageController(ISender sender) : BaseController
         return HandleResult(result);
     }
 
-    [HttpPatch("{id:int}/star")]
+    [HttpPatch("star/{id:int}")]
     public async Task<IActionResult> ToggleStar(
         int id,
         CancellationToken cancellationToken)
@@ -55,6 +55,15 @@ public class MessageController(ISender sender) : BaseController
             new UnreadCountMessage.Query(),
             cancellationToken);
 
+        return HandleResult(result);
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(
+    int id,
+    CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetMessage.Query(id), cancellationToken);
         return HandleResult(result);
     }
 }

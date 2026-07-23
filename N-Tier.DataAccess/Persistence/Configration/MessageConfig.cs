@@ -4,6 +4,6 @@ public class MessageConfig : IEntityTypeConfiguration<Message>
 {
     public void Configure(EntityTypeBuilder<Message> builder)
     {
-       
+        builder.HasQueryFilter(x => !x.IsDeleted);
     }
 }

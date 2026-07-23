@@ -1,4 +1,6 @@
+using Hangfire;
 using N_Tier.API.Middlewares;
+using N_Tier.Application.BackgroundJobs;
 using N_Tier.Application.Helper.Seed;
 using N_Tier.Application.Hub;
 
@@ -9,6 +11,7 @@ builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddValidationServices();
+builder.Services.AddHangfireServices(builder.Configuration);
 builder.Services.AddSignalR();
 builder.Services.AddCorsPolicy();
 builder.Services.AddControllers();
@@ -37,12 +40,21 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 app.UseExceptionHandler();
-app.MapHub<NotificationHub>("/notificationHub");
+
 app.UseStaticFiles();
+
 app.UseCors("MyPolicy");
+
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseHangfireDashboard("/dashboard");
+
+app.MapHub<NotificationHub>("/notificationHub");
 app.MapControllers();
+
+HangfireScheduler.RegisterJobs();
 
 app.Run();

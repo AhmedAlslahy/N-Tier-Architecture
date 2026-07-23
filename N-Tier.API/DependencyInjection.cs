@@ -1,4 +1,6 @@
-﻿using N_Tier.Application.Features.Auth;
+﻿using Hangfire;
+using N_Tier.Application.BackgroundJobs;
+using N_Tier.Application.Features.Auth;
 using N_Tier.Application.Helper.DTOs.Config;
 using N_Tier.Application.Helper.Services.Implementation;
 using N_Tier.Application.Helper.Services.Interfaces;
@@ -65,6 +67,29 @@ public static class DependencyInjection
         {
             cfg.RegisterServicesFromAssembly(typeof(Register.Handler).Assembly);
         });
+
+        // Jobs
+        services.AddScoped<DeleteOldNotificationsJob>();
+        services.AddScoped<ClearExpiredOtpJob>();
+
+        return services;
+    }
+
+    //Jops
+    public static IServiceCollection AddHangfireServices(
+           this IServiceCollection services,
+           IConfiguration configuration)
+    {
+        services.AddHangfire(config =>
+        {
+            config.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                  .UseSimpleAssemblyNameTypeSerializer()
+                  .UseRecommendedSerializerSettings()
+                  .UseSqlServerStorage(
+                      configuration.GetConnectionString("ProjectConnection"));
+        });
+
+        services.AddHangfireServer();
 
         return services;
     }

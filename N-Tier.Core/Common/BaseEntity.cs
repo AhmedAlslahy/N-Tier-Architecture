@@ -3,7 +3,7 @@
 public abstract class BaseEntity<T> : IBaseEntity<T>
 {
     public T Id { get; set; } = default!;
-    public DateTime CreatedAt { get; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
     public DateTime? DeletedAt { get; set; }
     public int? DeletedById { get; set; }

@@ -12,9 +12,7 @@ public static class GetAllMessages
         IRequest<Result<PaginatedResult<MessageRes>>>
     {
         public bool? IsRead { get; init; }
-        public bool? GetAll { get; init; }
         public bool? IsStarred { get; init; }
-        public int? MessageId { get; init; }
     }
 
     public sealed record MessageRes
@@ -67,13 +65,8 @@ public static class GetAllMessages
         if (request.IsRead.HasValue)
             query = query.Where(m => m.IsRead == request.IsRead.Value);
 
-        if (request.GetAll == true)
-
-            if (request.IsStarred.HasValue)
-                query = query.Where(m => m.IsStarred == request.IsStarred.Value);
-
-        if (request.MessageId.HasValue)
-            query = query.Where(m => m.Id == request.MessageId.Value);
+        if (request.IsStarred.HasValue)
+            query = query.Where(m => m.IsStarred == request.IsStarred.Value);
 
         return query;
     }
