@@ -1,22 +1,22 @@
 ﻿using FluentValidation;
+using MediatR;
 using N_Tier.Application.Common.Abstraction;
 using N_Tier.Application.Common.Errors;
-using N_Tier.Application.Helper.User;
+using N_Tier.Application.Helper.Users;
 
 namespace N_Tier.Application.Features.Auth;
 
 public static class Register
 {
-    public sealed class RegisterReq
-    {
-        public required string FullName { get; init; }
-        public required string UserName { get; init; }
-        public required string Email { get; init; }
-        public required string Password { get; init; }
-        public required string ConfirmPassword { get; init; }
-    }
+    public sealed record Command(
+        string FullName,
+        string UserName,
+        string Email,
+        string Password,
+        string ConfirmPassword
+    ) : IRequest<Result>;
 
-    public sealed class Validator : AbstractValidator<RegisterReq>
+    public sealed class Validator : AbstractValidator<Command>
     {
         public Validator()
         {
@@ -46,22 +46,26 @@ public static class Register
         }
     }
 
-    public sealed class RegisterHandler(SarhneDbContext context)
+    public sealed class Handler(SarhneDbContext context)
+        : IRequestHandler<Command, Result>
     {
-        public async Task<Result> Handle(RegisterReq req, CancellationToken cancellationToken = default)
+        public async Task<Result> Handle(
+            Command req,
+            CancellationToken cancellationToken)
         {
             var existingUser = await context.Users.FindByEmailAsync(req.Email);
+
             if (existingUser != null)
                 return UserErrors.AlreadyExists;
 
-            var user = new Core.Identity.User
+            var user = new Core.Entities.Identity.User
             {
                 Email = req.Email,
                 FullName = req.FullName,
                 UserName = req.UserName,
                 PasswordHashed = PasswordService.HashPassword(req.Password),
                 EmailConfirmed = false,
-                UserSetting = new Core.Entities.UserSetting()
+                UserSetting = new UserSetting()
             };
 
             await context.Users.AddAsync(user, cancellationToken);

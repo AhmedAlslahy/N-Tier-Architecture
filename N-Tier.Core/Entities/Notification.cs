@@ -1,9 +1,9 @@
 ﻿using N_Tier.Core.Common;
-using N_Tier.Core.Identity;
+using N_Tier.Core.Entities.Identity;
 
 namespace N_Tier.Core.Entities;
 
-public class Notification : BaseEntity<int>
+public class Notification : BaseEntity
 {
     public string Title { get; set; } = null!;
     public string Body { get; set; } = string.Empty;

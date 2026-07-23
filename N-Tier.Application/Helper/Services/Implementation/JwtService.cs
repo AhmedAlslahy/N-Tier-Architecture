@@ -2,7 +2,6 @@
 using N_Tier.Application.Helper.DTOs.Config;
 using N_Tier.Application.Helper.DTOs.Token;
 using N_Tier.Application.Helper.Services.Interfaces;
-using N_Tier.Core.Identity;
 
 namespace N_Tier.Application.Helper.Services.Implementation;
 
@@ -10,7 +9,7 @@ public class JwtService(IOptions<JwtInformations> options) : IJwtService
 {
     private readonly JwtInformations jwt = options.Value;
 
-    public async Task<Result<GenerateTokenResDto>> GenerateToken(Core.Identity.User user, IList<string> roles)
+    public async Task<Result<GenerateTokenResDto>> GenerateToken(Core.Entities.Identity.User user, IList<string> roles)
     {
         List<Claim> UserClaims =
      [

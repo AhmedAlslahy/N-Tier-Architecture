@@ -2,5 +2,6 @@
 
 public interface ICurrentUserService
 {
-    string? UserId { get; }
+    int UserId { get; }
+    public bool IsAuthenticated { get; }
 }

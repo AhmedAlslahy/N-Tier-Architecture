@@ -1,4 +1,4 @@
-﻿using N_Tier.Core.Identity;
+﻿using N_Tier.Core.Entities.Identity;
 
 namespace N_Tier.DataAccess.Persistence;
 

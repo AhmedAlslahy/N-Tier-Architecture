@@ -1,9 +1,9 @@
 ﻿using N_Tier.Core.Common;
-using N_Tier.Core.Identity;
+using N_Tier.Core.Entities.Identity;
 
 namespace N_Tier.Core.Entities;
 
-public class UserSetting : BaseEntity<int>
+public class UserSetting : BaseEntity
 {
     public bool AllowAnonymousMessages { get; private set; } = true;
     public bool ShowLastSeen { get; private set; } = true;

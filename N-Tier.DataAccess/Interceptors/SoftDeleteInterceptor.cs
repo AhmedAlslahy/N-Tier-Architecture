@@ -1,6 +1,8 @@
-﻿namespace N_Tier.DataAccess.Interceptors;
+﻿using Microsoft.EntityFrameworkCore.Infrastructure;
 
-public class SoftDeleteInterceptor(IServiceProvider serviceProvider) : SaveChangesInterceptor
+namespace N_Tier.DataAccess.Interceptors;
+
+public class SoftDeleteInterceptor : SaveChangesInterceptor
 {
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
@@ -12,18 +14,21 @@ public class SoftDeleteInterceptor(IServiceProvider serviceProvider) : SaveChang
         if (context is null)
             return base.SavingChangesAsync(eventData, result, cancellationToken);
 
-        var currentUser = serviceProvider.GetService<ICurrentUserService>();
+        var currentUser = context.GetService<ICurrentUserService>();
 
-        foreach (var entry in context.ChangeTracker.Entries<BaseEntity<int>>())
+        if (!currentUser.IsAuthenticated)
+            return base.SavingChangesAsync(eventData, result, cancellationToken);
+
+        var entries = context
+            .ChangeTracker
+            .Entries<ISoftDeletableEntity>()
+            .Where(e => e.State == EntityState.Deleted);
+
+        foreach (var entry in entries)
         {
-            if (entry.State != EntityState.Deleted)
-                continue;
-
             entry.State = EntityState.Modified;
-
-            entry.Entity.IsDeleted = true;
-            entry.Entity.DeletedAt = DateTime.UtcNow;
-            entry.Entity.DeletedById = currentUser?.UserId;
+            entry.Entity.SoftDelete();
+            entry.Entity.DeletedById = currentUser.UserId;
         }
 
         return base.SavingChangesAsync(eventData, result, cancellationToken);

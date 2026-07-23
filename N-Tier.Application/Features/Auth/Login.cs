@@ -1,8 +1,9 @@
 ﻿using FluentValidation;
+using MediatR;
 using N_Tier.Application.Common.Abstraction;
 using N_Tier.Application.Common.Errors;
 using N_Tier.Application.Helper.Services.Interfaces;
-using N_Tier.Application.Helper.User;
+using N_Tier.Application.Helper.Users;
 
 namespace N_Tier.Application.Features.Auth;
 
@@ -14,21 +15,20 @@ public static class Login
         public DateTime ExpireIn { get; set; }
     }
 
-    public sealed class LoginReq
-    {
-        public required string Email { get; set; }
-        public required string Password { get; set; }
-    }
+    public sealed record Command(
+        string Email,
+        string Password
+    ) : IRequest<Result<LoginRes>>;
 
-    public sealed class Validator : AbstractValidator<LoginReq>
+    public sealed class Validator : AbstractValidator<Command>
     {
         public Validator()
         {
             RuleFor(x => x.Email)
-           .NotEmpty()
-           .WithMessage("Email is required.")
-           .EmailAddress()
-           .WithMessage("Invalid email format.");
+                .NotEmpty()
+                .WithMessage("Email is required.")
+                .EmailAddress()
+                .WithMessage("Invalid email format.");
 
             RuleFor(x => x.Password)
                 .NotEmpty()
@@ -38,23 +38,33 @@ public static class Login
         }
     }
 
-    public sealed class LoginHandler(SarhneDbContext context, IJwtService jwtService)
+    public sealed class Handler(
+        SarhneDbContext context,
+        IJwtService jwtService)
+        : IRequestHandler<Command, Result<LoginRes>>
     {
-        public async Task<Result<LoginRes>> Handle(LoginReq req)
+        public async Task<Result<LoginRes>> Handle(
+            Command req,
+            CancellationToken cancellationToken)
         {
             var user = await context.Users.FindByEmailAsync(req.Email);
+
             if (user == null)
             {
                 return UserErrors.NotFound;
             }
 
-            var passwordValid = PasswordService.VerifyPassword(req.Password, user.PasswordHashed);
+            var passwordValid = PasswordService.VerifyPassword(
+                req.Password,
+                user.PasswordHashed);
+
             if (!passwordValid)
             {
                 return AuthErrors.InvalidPassword;
             }
 
             var roles = await context.Users.GetRolesAsync(user.Id);
+
             var tokenResult = await jwtService.GenerateToken(user, roles);
 
             if (!tokenResult.IsSuccess)
@@ -62,12 +72,11 @@ public static class Login
                 return tokenResult.Failure;
             }
 
-            var data = new LoginRes
+            return new LoginRes
             {
                 Token = tokenResult.Data!.Token,
                 ExpireIn = tokenResult.Data.ExpireIn
             };
-            return data;
         }
     }
 }

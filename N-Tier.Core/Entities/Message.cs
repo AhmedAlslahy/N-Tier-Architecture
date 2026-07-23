@@ -1,9 +1,9 @@
 ﻿using N_Tier.Core.Common;
-using N_Tier.Core.Identity;
+using N_Tier.Core.Entities.Identity;
 
 namespace N_Tier.Core.Entities;
 
-public class Message : BaseEntity<int>
+public class Message : BaseEntity
 {
     public string? Content { get; set; }
     public string? PhotoUrl { get; set; }

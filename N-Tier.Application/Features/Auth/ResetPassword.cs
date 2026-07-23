@@ -1,19 +1,20 @@
 ﻿using FluentValidation;
+using MediatR;
 using N_Tier.Application.Common.Abstraction;
 using N_Tier.Application.Common.Errors;
-using N_Tier.Application.Helper.User;
+using N_Tier.Application.Helper.Users;
+using N_Tier.Shared.Service;
 
 namespace N_Tier.Application.Features.Auth;
 
 public static class ResetPassword
 {
-    public sealed class ResetPasswordReq
-    {
-        public required string CurrentPassword { get; set; }
-        public required string NewPassword { get; set; }
-    }
+    public sealed record Command(
+        string CurrentPassword,
+        string NewPassword
+    ) : IRequest<Result>;
 
-    public sealed class Validator : AbstractValidator<ResetPasswordReq>
+    public sealed class Validator : AbstractValidator<Command>
     {
         public Validator()
         {
@@ -34,25 +35,37 @@ public static class ResetPassword
         }
     }
 
-    public sealed class ResetPasswordHandler(SarhneDbContext context)
+    public sealed class Handler(
+        SarhneDbContext context,
+        ICurrentUserService currentUser)
+        : IRequestHandler<Command, Result>
     {
-        public async Task<Result> Handle(ResetPasswordReq req, int userId)
+        public async Task<Result> Handle(
+            Command req,
+            CancellationToken cancellationToken)
         {
-            var user = await context.Users.FindByIdAsync(userId);
+            var user = await context.Users.FindByIdAsync(currentUser.UserId);
+
             if (user == null)
             {
                 return UserErrors.NotFound;
             }
 
-            var verify = PasswordService.VerifyPassword(req.CurrentPassword, user.PasswordHashed);
+            var verify = PasswordService.VerifyPassword(
+                req.CurrentPassword,
+                user.PasswordHashed);
+
             if (!verify)
             {
-                return new Error("Wrong Password", "Current password is incorrect", ErrorType.BadRequest);
+                return new Error(
+                    "Wrong Password",
+                    "Current password is incorrect",
+                    ErrorType.BadRequest);
             }
 
-            var NewpasswordHash = PasswordService.HashPassword(req.NewPassword);
-            user.PasswordHashed = NewpasswordHash;
-            await context.SaveChangesAsync();
+            user.PasswordHashed = PasswordService.HashPassword(req.NewPassword);
+
+            await context.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
         }

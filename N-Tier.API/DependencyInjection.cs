@@ -1,17 +1,8 @@
-﻿using N_Tier.Application.Features.Admin.Message;
-using N_Tier.Application.Features.Admin.Notification;
-using N_Tier.Application.Features.Admin.Role;
-using N_Tier.Application.Features.Admin.User;
-using N_Tier.Application.Features.Auth;
-using N_Tier.Application.Features.User.Message;
-using N_Tier.Application.Features.User.Notification;
-using N_Tier.Application.Features.User.User;
-using N_Tier.Application.Features.User.UserSetting;
+﻿using N_Tier.Application.Features.Auth;
 using N_Tier.Application.Helper.DTOs.Config;
 using N_Tier.Application.Helper.Services.Implementation;
 using N_Tier.Application.Helper.Services.Interfaces;
 using N_Tier.Shared.Service;
-using static N_Tier.Application.Features.Auth.Register;
 
 namespace N_Tier.API;
 
@@ -35,18 +26,22 @@ public static class DependencyInjection
     //Database
     public static IServiceCollection AddDatabase(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration
+    )
     {
-        services.AddDbContext<SarhneDbContext>((sp, options) =>
-        {
-            options.UseSqlServer(
-                configuration.GetConnectionString("ProjectConnection"));
+        services.AddSingleton<AuditInterceptor>();
+        services.AddSingleton<SoftDeleteInterceptor>();
 
-            options.AddInterceptors(
-                sp.GetRequiredService<AuditInterceptor>(),
-                sp.GetRequiredService<UpdateAuditInterceptor>(),
-                sp.GetRequiredService<SoftDeleteInterceptor>());
-        });
+        services.AddDbContext<SarhneDbContext>(
+            (sp, options) =>
+            {
+                options.UseSqlServer(configuration.GetConnectionString("ProjectConnection"));
+
+                options.AddInterceptors(
+                    sp.GetRequiredService<AuditInterceptor>(),
+                    sp.GetRequiredService<SoftDeleteInterceptor>()
+                );
+            });
 
         return services;
     }
@@ -63,55 +58,13 @@ public static class DependencyInjection
 
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
-        services.AddScoped<AuditInterceptor>();
-        services.AddScoped<UpdateAuditInterceptor>();
-        services.AddScoped<SoftDeleteInterceptor>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IEmailService, EmailService>();
 
-        //Role
-        services.AddScoped<GetAllRoles.GetAllRolesHandler>();
-        services.AddScoped<DeleteRole.DeleteRoleHandler>();
-        services.AddScoped<CreateRole.CreateRoleHandler>();
-        services.AddScoped<AddAdminRole.AddAdminRoleHandler>();
-
-        //User
-        services.AddScoped<DeleteUser.DeleteUserHandler>();
-        services.AddScoped<UpdateUser.UpdateUserHandler>();
-        services.AddScoped<GetAllUsers.GetAllUsersHandler>();
-        services.AddScoped<GetByLink.GetByLinkHandler>();
-
-        //User Setting
-        services.AddScoped<UpdateUserSetting.UpdateUserSettingHandler>();
-        services.AddScoped<GetByLink.GetByLinkHandler>();
-
-        //Auth
-        services.AddScoped<Login.LoginHandler>();
-        services.AddScoped<Register.RegisterHandler>();
-
-        //Email
-        services.AddScoped<SendConfirmEmailOTP.SendConfirmEmailOTPHandler>();
-        services.AddScoped<SendForgetPasswordOTP.SendForgetPasswordOTPHandler>();
-        services.AddScoped<ConfirmEmail.ConfirmEmailHandler>();
-        services.AddScoped<ForgetPassword.ForgetPasswordHandler>();
-        services.AddScoped<ResetPassword.ResetPasswordHandler>();
-
-        //Notification
-        services.AddScoped<SendNotification.SendNotificationHandler>();
-        services.AddScoped<GetAllNotificationsByUserId.GetAllNotificationsByUserIdHandler>();
-        services.AddScoped<GetNotificationById.GetNotificationByIdHandler>();
-        services.AddScoped<UnreadCountNotificationByUserId.UnreadCountNotificationByUserIdHandler>();
-
-        //Message
-        services.AddScoped<SendMessage.SendMessageHandler>();
-        services.AddScoped<GetAllMessageByUserId.GetAllMessageByUserIdHandler>();
-        services.AddScoped<GetAllSenderMessageByUserId.GetAllSenderMessageByUserIdHandler>();
-        services.AddScoped<GetAllMessageStarredByUserId.GetAllMessageStarredByUserIdHandler>();
-        services.AddScoped<GetAllUnreadMessageByUserId.GetAllUnreadMessageByUserIdHandler>();
-        services.AddScoped<GetMessageById.GetMessageByIdHandler>();
-        services.AddScoped<SearchByWordOrUserName.SearchByWordOrUserNameHandler>();
-        services.AddScoped<StarredMessageById.StarredMessageByIdHandler>();
-        services.AddScoped<UnreadCountMessageByUserId.UnreadCountMessageByUserIdHandler>();
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Register.Handler).Assembly);
+        });
 
         return services;
     }
@@ -138,7 +91,7 @@ public static class DependencyInjection
         this IServiceCollection services)
     {
         services.AddValidatorsFromAssembly(
-                typeof(RegisterReq).Assembly)
+                typeof(Register.Command).Assembly)
                .AddFluentValidationAutoValidation();
 
         return services;

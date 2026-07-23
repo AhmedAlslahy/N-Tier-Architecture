@@ -9,46 +9,36 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
     {
         logger.LogError(exception, exception.Message);
 
-        ProblemDetails problem;
-
-        switch (exception)
+        var problem = exception switch
         {
-            case UnauthorizedException:
-                problem = new ProblemDetails
-                {
-                    Status = 401,
-                    Title = "Unauthorized",
-                    Detail = exception.Message
-                };
-                break;
+            UnauthorizedException => new ProblemDetails
+            {
+                Status = StatusCodes.Status401Unauthorized,
+                Title = "Unauthorized",
+                Detail = exception.Message
+            },
 
-            case ForbiddenException:
-                problem = new ProblemDetails
-                {
-                    Status = 403,
-                    Title = "Forbidden",
-                    Detail = exception.Message
-                };
-                break;
+            ForbiddenException => new ProblemDetails
+            {
+                Status = StatusCodes.Status403Forbidden,
+                Title = "Forbidden",
+                Detail = exception.Message
+            },
 
-            case NotFoundException:
-                problem = new ProblemDetails
-                {
-                    Status = 404,
-                    Title = "Not Found",
-                    Detail = exception.Message
-                };
-                break;
+            NotFoundException => new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Not Found",
+                Detail = exception.Message
+            },
 
-            default:
-                problem = new ProblemDetails
-                {
-                    Status = 500,
-                    Title = "Internal Server Error",
-                    Detail = "An unexpected error occurred."
-                };
-                break;
-        }
+            _ => new ProblemDetails
+            {
+                Status = StatusCodes.Status500InternalServerError,
+                Title = "Internal Server Error",
+                Detail = "An unexpected error occurred."
+            }
+        };
 
         context.Response.StatusCode = problem.Status!.Value;
 

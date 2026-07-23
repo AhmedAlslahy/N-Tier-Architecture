@@ -1,7 +1,6 @@
 ﻿using N_Tier.Application.Common.Abstraction;
 using N_Tier.Application.Helper.DTOs.Config;
 using N_Tier.Application.Helper.Services.Interfaces;
-using N_Tier.Application.Helper.User;
 
 namespace N_Tier.Application.Helper.Services.Implementation;
 

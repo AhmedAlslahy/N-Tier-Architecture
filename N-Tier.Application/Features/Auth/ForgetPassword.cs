@@ -1,53 +1,57 @@
 ﻿using FluentValidation;
+using MediatR;
 using N_Tier.Application.Common.Abstraction;
 using N_Tier.Application.Common.Errors;
-using N_Tier.Application.Helper.User;
+using N_Tier.Application.Helper.Users;
 
 namespace N_Tier.Application.Features.Auth;
 
 public static class ForgetPassword
 {
-    public sealed class ForgetPasswordReq
-    {
-        public required string OTP { get; set; }
-        public required string NewPassword { get; set; }
-    }
+    public sealed record Command(string Email, string OTP, string NewPassword) : IRequest<Result>;
 
-    public class Validator : AbstractValidator<ForgetPasswordReq>
+    public sealed class Validator : AbstractValidator<Command>
     {
         public Validator()
         {
+            RuleFor(x => x.Email)
+                .NotEmpty()
+                .EmailAddress();
+
             RuleFor(x => x.OTP)
                 .NotEmpty()
-                .WithMessage("OTP is required.")
                 .Matches(@"^\d{6}$");
 
             RuleFor(x => x.NewPassword)
                 .NotEmpty()
-                .WithMessage("Password is required.")
-                .MinimumLength(8)
-                .WithMessage("Password must be at least 8 characters.");
+                .MinimumLength(8);
         }
     }
 
-    public sealed class ForgetPasswordHandler(SarhneDbContext context)
+    public sealed class Handler(SarhneDbContext context)
+        : IRequestHandler<Command, Result>
     {
-        public async Task<Result> Handle(ForgetPasswordReq req, string email)
+        public async Task<Result> Handle(
+            Command req,
+            CancellationToken cancellationToken)
         {
-            var user = await context.Users.FindByEmailAsync(email);
+            var user = await context.Users.FindByEmailAsync(req.Email);
+
             if (user == null)
             {
                 return UserErrors.NotFound;
             }
+
             if (req.OTP != user.OTP || DateTime.UtcNow > user.OTPExpire)
             {
                 return new Error("The OTP Is Wrong Or Expire", "Cannot add new password", ErrorType.BadRequest);
             }
+
             user.OTP = null;
             user.OTPExpire = null;
-            var passwordHash = PasswordService.HashPassword(req.NewPassword);
-            user.PasswordHashed = passwordHash;
-            await context.SaveChangesAsync();
+            user.PasswordHashed = PasswordService.HashPassword(req.NewPassword);
+
+            await context.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
         }

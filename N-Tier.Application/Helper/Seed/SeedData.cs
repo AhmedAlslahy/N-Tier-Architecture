@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using N_Tier.Core.Identity;
+using N_Tier.Application.Helper.Users;
+using N_Tier.Core.Entities.Identity;
 
 namespace N_Tier.Application.Helper.Seed;
 
@@ -32,7 +33,7 @@ public static class SeedData
         {
             var role = await context.Set<Role>()
                .FirstOrDefaultAsync(r => r.Name == "Admin");
-            var admin = new Core.Identity.User
+            var admin = new User
             {
                 FullName = "admin",
                 UserName = "admin",

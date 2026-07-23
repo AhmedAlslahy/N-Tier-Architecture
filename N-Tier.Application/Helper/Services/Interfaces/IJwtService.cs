@@ -5,5 +5,5 @@ namespace N_Tier.Application.Helper.Services.Interfaces;
 
 public interface IJwtService
 {
-    Task<Result<GenerateTokenResDto>> GenerateToken(Core.Identity.User user, IList<string> roles);
+    Task<Result<GenerateTokenResDto>> GenerateToken(Core.Entities.Identity.User user, IList<string> roles);
 }

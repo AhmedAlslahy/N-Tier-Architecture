@@ -13,7 +13,10 @@ builder.Services.AddSignalR();
 builder.Services.AddCorsPolicy();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.CustomSchemaIds(type => type.FullName!.Replace("+", "."));
+});
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 //------------------------------------------------------------------------------------------
