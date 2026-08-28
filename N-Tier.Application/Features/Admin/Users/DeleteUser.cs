@@ -20,7 +20,7 @@ public static class DeleteUser
                 return UserErrors.NotFound;
             }
 
-            context.Entry(user).State = EntityState.Deleted;
+            context.Users.Remove(user);
 
             await context.SaveChangesAsync(cancellationToken);
 
