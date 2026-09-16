@@ -4,6 +4,7 @@ using N_Tier.Application.Common.Abstraction;
 using N_Tier.Application.Common.Errors;
 using N_Tier.Application.Helper.Services.Interfaces;
 using N_Tier.Application.Helper.Users;
+using N_Tier.Core.Entities.Identity;
 
 namespace N_Tier.Application.Features.Auth;
 
@@ -12,7 +13,9 @@ public static class Login
     public sealed class LoginRes
     {
         public required string Token { get; set; }
-        public DateTime ExpireIn { get; set; }
+        public DateTime TokenExpireIn { get; set; }
+        public required string RefreshToken { get; set; }
+        public DateTime RefreshTokenExpireIn { get; set; }
     }
 
     public sealed record Command(
@@ -40,6 +43,7 @@ public static class Login
 
     public sealed class Handler(
         SarhneDbContext context,
+        IRefreshTokenService refreshTokenService,
         IJwtService jwtService)
         : IRequestHandler<Command, Result<LoginRes>>
     {
@@ -72,10 +76,26 @@ public static class Login
                 return tokenResult.Failure;
             }
 
+            // Generate Refresh Token
+            var refreshToken = refreshTokenService.GenerateToken();
+
+            var refreshTokenEntity = new Core.Entities.Identity.RefreshToken
+            {
+                TokenHash = refreshTokenService.HashToken(refreshToken),
+                UserId = user.Id,
+                CreatedOn = DateTime.UtcNow,
+                ExpiresOn = DateTime.UtcNow.AddDays(7)
+            };
+
+            context.RefreshTokens.Add(refreshTokenEntity);
+            await context.SaveChangesAsync(cancellationToken);
+
             return new LoginRes
             {
                 Token = tokenResult.Data!.Token,
-                ExpireIn = tokenResult.Data.ExpireIn
+                TokenExpireIn = tokenResult.Data.ExpireIn,
+                RefreshToken = refreshToken,
+                RefreshTokenExpireIn = refreshTokenEntity.ExpiresOn
             };
         }
     }

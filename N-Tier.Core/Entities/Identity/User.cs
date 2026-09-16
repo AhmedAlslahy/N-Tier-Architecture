@@ -54,4 +54,5 @@ public class User : BaseEntity
     public ICollection<Message> ReceivedMessages { get; set; } = new HashSet<Message>();
     public ICollection<Message> SentMessages { get; set; } = new HashSet<Message>();
     public ICollection<Notification> Notifications { get; set; } = new HashSet<Notification>();
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = new HashSet<RefreshToken>();
 }

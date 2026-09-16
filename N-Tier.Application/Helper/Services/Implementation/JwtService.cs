@@ -29,14 +29,14 @@ public class JwtService(IOptions<JwtInformations> options) : IJwtService
         JwtSecurityToken userToken = new JwtSecurityToken(
             audience: jwt.AudienceIP,
             issuer: jwt.IssuerIP,
-            expires: DateTime.UtcNow.AddHours(1),
+            expires: DateTime.UtcNow.AddMinutes(1),
             signingCredentials: SignInCred,
             claims: UserClaims
          );
         var data = new GenerateTokenResDto
         {
             Token = new JwtSecurityTokenHandler().WriteToken(userToken),
-            ExpireIn = DateTime.UtcNow.AddHours(1),
+            ExpireIn = DateTime.UtcNow.AddMinutes(1),
         };
 
         return Result<GenerateTokenResDto>.Success(data);

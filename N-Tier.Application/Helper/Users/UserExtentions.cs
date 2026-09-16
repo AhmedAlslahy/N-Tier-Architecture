@@ -6,7 +6,8 @@ public static class UserExtentions
 {
     public static async Task<User?> FindByEmailAsync(this IQueryable<User> users, string email)
     {
-        return await users.FirstOrDefaultAsync(u => u.NormalizedEmail == email.ToUpperInvariant());
+        var normalizedEmail = email.ToUpperInvariant();
+        return await users.FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail);
     }
 
     public static async Task<User?> FindByIdAsync(this IQueryable<User> users, int userId)
@@ -60,10 +61,8 @@ public static class UserExtentions
            string roleName)
     {
         var role = await context.Set<Role>()
-            .FirstOrDefaultAsync(r => r.Name == roleName);
-
-        if (role == null)
-            throw new Exception("Role not found");
+            .FirstOrDefaultAsync(r => r.Name == roleName)
+            ?? throw new Exception("Role not found");
 
         bool exists = user.UserRoles.Any(ur => ur.RoleId == role.Id);
         if (exists)

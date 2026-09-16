@@ -13,19 +13,7 @@ public class AuthController(ISender sender) : BaseController
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken);
-
-        if (!result.IsSuccess)
-            return HandleResult(result);
-
-        Response.Cookies.Append("jwt", result.Data!.Token, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
-            Expires = result.Data.ExpireIn
-        });
-
-        return Ok(result.Data);
+        return HandleResult(result);
     }
 
     [HttpPost("register")]
@@ -37,13 +25,21 @@ public class AuthController(ISender sender) : BaseController
         return HandleResult(result);
     }
 
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken(
+       RefreshToken.Command command)
+    {
+        var result = await sender.Send(command);
+        return HandleResult(result);
+    }
+
     [Authorize]
     [HttpPost("logout")]
-    public IActionResult Logout()
+    public async Task<IActionResult> Logout(
+        Logout.Command command)
     {
-        Response.Cookies.Delete("jwt");
-
-        return Ok(new { message = "Logged out successfully" });
+        var result = await sender.Send(command);
+        return HandleResult(result);
     }
 
     //----------------------------------------------------

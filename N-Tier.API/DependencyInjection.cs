@@ -62,6 +62,7 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
         services.AddMediatR(cfg =>
         {

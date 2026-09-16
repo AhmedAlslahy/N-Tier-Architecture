@@ -4,12 +4,15 @@ namespace N_Tier.Application.Common.Errors;
 
 public class AuthErrors
 {
-    public static Error NotFound
-     = new Error("Auth.NotFound", "Auth not found", ErrorType.NotFound);
+    public static readonly Error NotFound
+     = new("Auth.NotFound", "Auth not found", ErrorType.NotFound);
 
-    public static Error InvalidData
-       = new Error("Auth.InvalidData", "Invalid Auth data", ErrorType.BadRequest);
+    public static readonly Error InvalidData
+       = new("Auth.InvalidData", "Invalid Auth data", ErrorType.BadRequest);
 
-    public static Error InvalidPassword
-     = new Error("Auth.InvalidPassword", "Cannot Reset Password", ErrorType.BadRequest);
+    public static readonly Error InvalidPassword
+     = new("Auth.InvalidPassword", "Cannot Reset Password", ErrorType.BadRequest);
+
+    public static readonly Error InvalidRefreshToken =
+    new("Auth.InvalidRefreshToken", "Invalid or expired refresh token", ErrorType.Unauthorized);
 }

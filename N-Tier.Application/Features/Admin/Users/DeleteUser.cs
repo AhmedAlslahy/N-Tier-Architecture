@@ -13,7 +13,7 @@ public static class DeleteUser
     {
         public async Task<Result> Handle(Command request, CancellationToken cancellationToken)
         {
-            var user = await context.Users.FindAsync(request.UserId);
+            var user = await context.Users.FindAsync([request.UserId], cancellationToken);
 
             if (user == null)
             {
